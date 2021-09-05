@@ -1,0 +1,20 @@
+{% extends 'forum/base.html' %}
+{% load static %}
+
+{% block title %}{{ subject }}{% endblock %}
+
+{% block body %}
+<center>
+<img src="/media/{{ image }}" style="width: 70%;" class="my-4 mx-4">
+<h1>{{ subject }}</h1>
+<h3>{{ summary }}</h3>
+<p>Posted on {{ date }} by {{ author }}</p>
+<article class="my-4 mx-4">
+    <div class="container my-4 mx-4">
+        {{ description }}
+    </div>
+</article>
+<h3>Status of issue: {{ status }}</h3>
+</center>
+
+{% endblock %}

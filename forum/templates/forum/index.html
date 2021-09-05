@@ -1,6 +1,6 @@
 {% extends 'forum/base.html' %}
 
-{% block title %}Home::Campus E-Governance Forum{% endblock %}
+{% block title %}Forum::Campus E-Governance{% endblock %}
 
 {% block style %}
     <!-- .grid{
@@ -12,23 +12,32 @@
 <center><a href="#" class="btn btn-outline-danger my-4" style="width: 70%;">Post an issue</a></center>
 
 <h2 align="center">Posted Issues:</h2>
-<div class="grid my-4 mx-4">
+
+<div class="row my-4 mx-4">
     {% for i in issues|slice:":" %}
-    <div class="g-col-4 my-4 mx-4" id="card {{ forloop.counter }}">
-        <div class="card" style="width: 33%;">
-            <img src="/media/{{ i.image }}" class="card-img-top img-fluid" alt="...">
+    <div class="col-sm-4">
+      <div class="card">
+        <img src="/media/{{ i.image }}" class="card-img-top img-fluid" alt="..." style="aspect-ratio: 1/1;">
             <div class="card-body">
               <h5 class="card-title">{{ i.subject }}</h5>
               <p class="card-text">{{ i.summary }}</p>
               <p class="card-text">Posted on: {{ i.date }} by {{ i.author }}</p>
               <p class="card-text">Tracked? {{ i.tracked|yesno:"Yes,No" }}</p>
-              <a href="#" class="btn btn-outline-primary">View Issue</a>
+              <a href="{{i.slug}}" class="btn btn-outline-primary">View Issue</a>
             </div>
-          </div> 
+      </div>
     </div>
-    <!-- <div class="g-col-4">.g-col-4</div> -->
-    
     {% endfor %}
-</div>    
+    <!-- <div class="col-sm-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Special title treatment</h5>
+          <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+          <a href="#" class="btn btn-primary">Go somewhere</a>
+        </div>
+      </div>
+    </div> -->
+  </div>
+
 
 {% endblock %}
