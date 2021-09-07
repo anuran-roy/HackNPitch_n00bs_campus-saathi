@@ -1,0 +1,226 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Forum</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="{% static 'forum/dashboard/styles.css' %}" />
+  </head>
+  <body>
+    
+    <div id="wrapper">
+      <!-- Sidebar -->
+      <div id="sidebar-wrapper">
+        <div class="avatar">
+          <a href="#" data-toggle="tooltip" data-placement="right" title="Username: {{ username }}, Name: {{ first_name }} {{ last_name }}"><i class="fas fa-user"></i></a>
+        </div>
+        <ul>
+        
+
+
+          {% comment %} <li class="active_link">
+            <a href="#"><i class="fas fa-tint"></i></a>
+          </li>
+          <li>
+            <a href="#"><i class="fab fa-angellist"></i></a>
+          </li>
+          <li>
+            <a href="#"><i class="fas fa-archway"></i></a>
+          </li>
+          <li>
+            <a href="#"><i class="fas fa-beer"></i></a>
+          </li>
+          <li>
+            <a href="#"><i class="fas fa-book-reader"></i></a>
+          </li>
+          <div class="spacer"></div>
+          <li>
+            <a href="#"><i class="fas fa-cog"></i></a>
+          </li> {% endcomment %}
+          <li class="active_link">
+            <a href="/forum/logout"><i class="fas fa-power-off"></i></a>
+          </li>
+        </ul>
+      </div>
+      <!-- /#sidebar-wrapper -->
+
+      <!-- Page Content -->
+      <div id="page-content-wrapper">
+        <p class="row my-4">
+        <center><h2 style="color: white;">Welcome {{ first_name }} {{ last_name }} ({{ username }})</h2></center>
+        <br>
+        <br>
+        </p>
+        <div class="row">
+          <div class="card card1">
+            <div class="card1_title_wrapper">
+              <h1 class="car1_title">Your Posts</h1>
+              <p class="car1_text">
+                {{ activity|length }}
+                {% comment %} <span class="card1_span"
+                  >+3.2%<i class="fas fa-arrow-up"></i
+                ></span> {% endcomment %}
+              </p>
+            </div>
+            <div class="card1_table_wrapper">
+              <table class="card1_table card_scroll">
+                <thead class="card1_table_head">
+                  <tr>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Tracked</th>
+                    <th>Link</th>
+                  </tr>
+                </thead>
+                <tbody class="card1_table_tbody">
+                  {% for i in activity %}
+                    <tr>
+                      {% comment %} <td><i class="positiveIcon fas fa-check"></i> John Doe</td> {% endcomment %}
+                      <td>{{ i.subject }}</td>
+                      <td>{{ i.date }}</td>
+                      <td>{{ i.tracked|yesno:"Yes,No" }}</td>
+                      <td>
+                        <a href="/forum/post/{{ i.slug }}" target="_blank"><button class="btn btn-primary">Go</button></a>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card card2">
+            <div class="clock" onclick="changeClock()">
+              <div class="hour_wrapper">
+                <div class="hour" id="hr"></div>
+              </div>
+              <div class="minute_wrapper">
+                <div class="minute" id="mn"></div>
+              </div>
+              <div class="second_wrapper">
+                <div class="second" id="sc"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row row2">
+          <div class="card card3">
+            <div class="weather_title">
+              <button class="btn btn-secondary">Kolkata</button>
+              <span>16:05</span>
+            </div>
+            <div class="weather_image">
+              <img src="{% static 'forum/dashboard/images/cloud2.png' %}" alt="cloud" />
+              <span>Light Rain</span>
+            </div>
+            <div class="weather_bottom">
+              <div class="left_numbers">
+                <p><i class="fas fa-wind"></i> 19km/h</p>
+                <p><i class="fas fa-tint"></i> 65%</p>
+                <p><i class="fas fa-sun"></i> 3.5hr</p>
+              </div>
+              <div class="right_degree">
+                <p>19&#176;</p>
+              </div>
+            </div>
+          </div>
+          <div class="card card4">
+            <div class="card1_title_wrapper">
+              <h1 class="car1_title">Your comments</h1>
+              <p class="car1_text">
+                29 Todos
+                <span class="card1_span"
+                  >+1.4%<i class="fas fa-arrow-up"></i
+                ></span>
+              </p>
+            </div>
+            <div class="card1_table_wrapper card_scroll">
+              <table class="card1_table card_scroll">
+                <thead class="card1_table_head">
+                  <tr>
+                    <th>Comments</th>
+                    <th>Date</th>
+                    <th>Tracked</th>
+                    <th>Link</th>
+                  </tr>
+                </thead>
+                <tbody class="card1_table_tbody card_scroll">
+                  <tr>
+                    <td><i class="positiveIcon fas fa-check"></i> John Doe</td>
+                    <td>Operation Manager</td>
+                    <td>Yes</td>
+                    <td>
+                      <button class="btn btn-secondary">Completed</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <i class="negativeIcon fas fa-times"></i> Gonzales Higuan
+                    </td>
+                    <td>IT Stuff</td>
+                    <td>No</td>
+                    <td>
+                      <button class="btn btn-primary">Processing</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <i class="positiveIcon fas fa-check"></i> Turgut Ozben
+                    </td>
+                    <td>Architecture</td>
+                    <td>Yes</td>
+                    <td>
+                      <button class="btn btn-secondary">Completed</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /#page-content-wrapper -->
+    </div>
+
+    {% comment %} <script src="{% static 'forum/dashboard/main.js' %}"></script> {% endcomment %}
+    <script>
+      const clockDesigns = ["clock", "clock2", "clock3", "clock4", "clock5"];
+      const maxLength = clockDesigns.length;
+      let startIndex = 0;
+
+      const clock = document.querySelector(".clock");
+      clock.style.background = "url({% static 'forum/dashboard/images/clock.png' %})";
+      clock.style.backgroundSize = "cover";
+
+      function changeClock() {
+        startIndex++;
+        if (startIndex === maxLength) {
+          startIndex = 0;
+        }
+        clock.style.background = `url('images/${clockDesigns[startIndex]}.png')`;
+        clock.style.backgroundSize = "cover";
+      }
+
+      const deg = 6;
+      const hour = document.querySelector(".hour");
+      const minute = document.querySelector(".minute");
+      const second = document.querySelector(".second");
+
+      setInterval(() => {
+        let day = new Date();
+        let hh = day.getHours() * 30;
+        let mm = day.getMinutes() * deg;
+        let ss = day.getSeconds() * deg;
+
+        hour.style.transform = `rotateZ(${hh + mm / 12}deg)`;
+        minute.style.transform = `rotateZ(${mm}deg)`;
+        second.style.transform = `rotateZ(${ss}deg)`;
+      });
+
+    </script>
+  </body>
+</html>

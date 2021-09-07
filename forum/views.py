@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, HttpResponse
-from .models import Issue
+from .models import Issue, Comments
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -12,11 +12,13 @@ def index(request):
     return render(request, 'forum/index.html', params)
 
 def blogPost(request, slug):
-    a = Issue.objects.filter(slug=slug)
-    if list(a) == []:
+    post = Issue.objects.filter(slug=slug)
+    comments = Comment.objects.filter(post=post.first())
+    if list(post) == []:
         return HttpResponse("<h1>404 - Post not available!</h1>")
     else:
-        params = dict(a.values()[0])
+        params = dict(post.values()[0])
+        params["comments"] = comments
         return render(request, 'forum/issue.html', params)
 
 def signup(request):
@@ -55,7 +57,8 @@ def loginUser(request):
 def logoutUser(request):
     # if request.method == 'POST':
     logout(request)
-    return HttpResponse("<h1>You've been successfully logged out.</h1>")
+    # return HttpResponse("<h1>You've been successfully logged out.</h1>")
+    return redirect('/forum/')
 
 def newUser(request):
     if request.method == 'POST':    
@@ -109,8 +112,22 @@ def userProfile(request, slug):
 
 def dashboard(request):
     if request.user.is_authenticated:
+        activity = list(Issue.objects.filter(author=request.user.username))
         data = User.objects.filter(username = request.user.username)
-    
-        return HttpResponse(f"<h1>This will be the Dashboard for {request.user.username}</h1>")
+        params = dict(data.values()[0])
+        params["activity"] = activity
+        # return HttpResponse(f"<h1>This will be the Dashboard for {request.user.username}</h1>")
+        return render(request, 'forum/dashboard.html', params)
     else:
         return redirect('/forum/login')
+
+def postComment(request, slug):
+    if request.method == 'POST':
+        # sno = 
+        comment = request.POST.get("comment")
+        user = request.user
+        postSno = request.POST.get("issueSno")
+        issues = Issue.objects.get(sno=postSno)
+    else:
+        pass
+    return redirect(f'/forum/post/{slug}')
