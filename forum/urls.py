@@ -14,5 +14,6 @@ urlpatterns = [
     path('loginuser/', views.loginUser, name="LoginUser"),
     path('logout/', views.logoutUser, name="LogoutUser"),
     path('uploadpost/', views.uploadPost, name="UploadPost"),
+    path('dashboard/', views.dashboard, name="Dashboard"),
     # path('user/<>')
 ]

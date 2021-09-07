@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.template.defaultfilters import slugify
+from random import randint
 
 # Create your views here.
 def index(request):
@@ -45,23 +46,23 @@ def loginUser(request):
 
         if user is not None:
             login(request, user)
-            return HttpResponse("<h1>Successfully logged in!</h1>")
+            return redirect('/forum/dashboard/')
         else:
             return HttpResponse("<h1>Credentials don't match.</h1>")
     else:
         return HttpResponse("<h1>HTTP 403 - Forbidden.</h1>")
 
 def logoutUser(request):
-    if request.method == 'POST':
-        logout(request)
-        return HttpResponse("<h1>You've been successfully logged out.</h1>")
+    # if request.method == 'POST':
+    logout(request)
+    return HttpResponse("<h1>You've been successfully logged out.</h1>")
 
 def newUser(request):
     if request.method == 'POST':    
         email = request.POST.get('email')
         password = request.POST.get('passwd', None)
         cpassword = request.POST.get('cpasswd', None)
-        username = email[:email.find('@')]
+        username = slugify(email[:email.find('@')].lower()+'-'+str(randint(1,10000)))
         if cpassword == password:
             myuser = User.objects.create_user(username, email, password)
             # return HttpResponse("<h1>This is the redirect page.<h1>")
@@ -82,8 +83,8 @@ def uploadPost(request):
         subject = request.POST.get('subject')
         summary = request.POST.get('summary')
         description = request.POST.get('description')
-        image = request.POST.get('image', None)
-
+        image = request.FILES.get('myfile')
+        print(image)
         author = request.user.username
         slug = slugify(f"{subject.lower()}-{author.lower()}")
         post = None
@@ -95,3 +96,21 @@ def uploadPost(request):
         return redirect('/forum/')
     else:
         return HttpResponse("<h1>HTTP 403 - Forbidden.</h1>")
+
+def userProfile(request, slug):
+    user = User.objects.filter(username=slug)
+
+    if list(user) == []:
+        return HttpResponse("<h1>Username not found!</h1>")
+    elif request.user.username == slug:
+        return redirect('/forum/dashboard/')
+    else:
+        return render(request, '/forum/user')
+
+def dashboard(request):
+    if request.user.is_authenticated:
+        data = User.objects.filter(username = request.user.username)
+    
+        return HttpResponse(f"<h1>This will be the Dashboard for {request.user.username}</h1>")
+    else:
+        return redirect('/forum/login')
