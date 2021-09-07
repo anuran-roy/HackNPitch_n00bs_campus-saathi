@@ -1,0 +1,48 @@
+{% extends 'forum/base.html' %}
+{% block title %}Signup{% endblock %}
+
+{% block body %}
+<p class="my-5 mx-5">
+    Signup for Campus Saathi Forum.
+</p>
+
+<form class="my-5 mx-5" action='/forum/newuser/' method='POST'>
+    {% csrf_token %}
+    <div class="row my-4">
+        <div class="col">
+          <input type="text" class="form-control" placeholder="First name*" aria-label="First name" name="fname" required>
+        </div>
+        <div class="col">
+          <input type="text" class="form-control" placeholder="Middle name" aria-label="Middle name" name="mname">
+        </div>
+        <div class="col">
+          <input type="text" class="form-control" placeholder="Last name*" aria-label="Last name" name="lname" required>
+        </div>
+        <div class="col">
+            <input type="text" class="form-control" placeholder="College Roll Number*" aria-label="College Roll Number" name="rollno" required>
+          </div>
+      </div>
+    <div class="mb-3">
+      <!-- <label for="exampleInputEmail1" class="form-label">Email address</label> -->
+      <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Email address*" name="email" required>
+      <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+    </div>
+    <div class="mb-3">
+      <!-- <label for="exampleInputPassword1" class="form-label">Password</label> -->
+      <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password*" name="passwd" required>
+    </div>
+    <div class="mb-3">
+      <!-- <label for="exampleInputPassword1" class="form-label">Password</label> -->
+      <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Confirm Password*" name="cpasswd" required>
+    </div>
+    <!-- <div class="mb-3 form-check">
+      <input type="checkbox" class="form-check-input" id="exampleCheck1">
+      <label class="form-check-label" for="exampleCheck1">Check me out</label>
+    </div> -->
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+
+  <p class="my-5 mx-5">
+      Have an account? <a href="/forum/login/">Login</a>
+  </p>
+{% endblock %}

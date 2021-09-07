@@ -1,0 +1,30 @@
+{% extends 'forum/base.html' %}
+{% block title %}New Post{% endblock %}
+
+{% block body %}
+<div class="my-5 mx-5">
+    <h2>New Issue</h2>
+    <form method="POST" action="/forum/uploadpost/">
+        {% csrf_token %}
+        <div class="mb-3 my-4 mx-4">
+            <div class="form-floating mb-4 my-4 mx-4">
+                <input type="text" class="form-control" id="subject" placeholder="Subject of issue" name="subject" required>
+                <label for="subject" class="form-label">Subject of Issue*</label>
+            </div>
+            <div class="form-floating mb-4 my-4 mx-4">
+                <input type="text" class="form-control" id="summary" placeholder="Summary of issue" name="summary" required>
+                <label for="summary" class="form-label">Summary of Issue*</label>
+            </div>
+        </div>
+        <div class="form-floating my-4 mx-4">
+            <textarea class="form-control" style="height: 250px;" placeholder="Describe your issue" id="floatingTextarea2" style="height: 100px" name="description" required></textarea>
+            <label for="floatingTextarea2">Description*</label>
+        </div>
+        <div class="my-5 mx-5">
+            <div class="my-4">Upload image:</div>
+            <input type="file" id="myFile" name="image">
+        </div>
+        <center><button type="submit" class="btn btn-outline-primary btn-lg">Submit</button></center>
+    </form>
+</div>
+{% endblock %}

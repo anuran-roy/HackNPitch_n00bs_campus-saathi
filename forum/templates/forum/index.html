@@ -18,21 +18,21 @@
 {% endblock %}
 {% block body %}
 <!-- <h1>This will be the forum homepage</h1> -->
-<center><a href="#" class="btn btn-outline-danger my-4" style="width: 70%;">Post an issue</a></center>
+<center><a href="newpost/" class="btn btn-outline-danger my-4" style="width: 70%;">Post an issue</a></center>
 
 <h2 align="center">Posted Issues:</h2>
 
 <div class="row my-4 mx-4">
     {% for i in issues|slice:":" %}
     <div class="col-sm-4">
-      <div class="card">
+      <div class="card my-4 mx-4">
         <img src="/media/{{ i.image }}" class="card-img-top img-fluid" alt="..." style="aspect-ratio: 3/2;">
             <div class="card-body">
               <h5 class="card-title">{{ i.subject }}</h5>
-              <p class="card-text">{{ i.summary }}</p>
+              <p class="card-text">{{ i.summary|truncatechars:75 }}</p>
               <p class="card-text">Posted on: {{ i.date }} by {{ i.author }}</p>
               <p class="card-text">Tracked? {{ i.tracked|yesno:"Yes,No" }}</p>
-              <a href="{{i.slug}}" class="btn btn-outline-primary">View Issue</a>
+              <a href="/forum/post/{{i.slug}}" class="btn btn-outline-primary">View Issue</a>
             </div>
       </div>
     </div>
