@@ -210,11 +210,11 @@ body {
 
 /* Custom CSS added by Anuran */
 
-table {
+.card_scroll {
   overflow-x: hidden;
   overflow-y: scroll;
-  display: block;
-  height: 100px;
+  /* display: block; */
+  height: 250px !important;
 }
 
 /* End of custom CSS */

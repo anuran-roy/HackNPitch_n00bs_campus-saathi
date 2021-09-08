@@ -43,7 +43,7 @@
             <a href="#"><i class="fas fa-cog"></i></a>
           </li> {% endcomment %}
           <li class="active_link">
-            <a href="/forum/logout"><i class="fas fa-power-off"></i></a>
+            <a data-toggle="tooltip" data-placement="right" title="Logout" href="/forum/logout"><i class="fas fa-power-off"></i></a>
           </li>
         </ul>
       </div>
@@ -61,10 +61,10 @@
             <div class="card1_title_wrapper">
               <h1 class="car1_title">Your Posts</h1>
               <p class="car1_text">
-                {{ activity|length }}
-                {% comment %} <span class="card1_span"
-                  >+3.2%<i class="fas fa-arrow-up"></i
-                ></span> {% endcomment %}
+                {{ activity|length }}  
+                <a href="/forum/newpost/" style="text-decoration: none;"><span class="card1_span"
+                  >New post <i class="fas fa-plus"></i
+                ></span></a>
               </p>
             </div>
             <div class="card1_table_wrapper">

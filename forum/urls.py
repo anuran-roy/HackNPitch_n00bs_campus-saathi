@@ -24,5 +24,5 @@ urlpatterns = [
 
     # Interface related APIs
     path('dashboard/', views.dashboard, name="Dashboard"),
-    # path('user/<>')
+    path('user/<str:slug>', views.userProfile, name="UserProfile"),
 ]

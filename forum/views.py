@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, HttpResponse
-from .models import Issue, Comments
+from .models import Issue, Comment
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -11,14 +11,17 @@ def index(request):
     params = {'issues': Issue.objects.all()}
     return render(request, 'forum/index.html', params)
 
+def search(request):
+    return HttpResponse("<h1>Search function invoked!</h1>")
+
 def blogPost(request, slug):
     post = Issue.objects.filter(slug=slug)
-    comments = Comment.objects.filter(post=post.first())
+    # comments = Comment.objects.filter(post=post.first())
     if list(post) == []:
         return HttpResponse("<h1>404 - Post not available!</h1>")
     else:
         params = dict(post.values()[0])
-        params["comments"] = comments
+        # params["comments"] = comments
         return render(request, 'forum/issue.html', params)
 
 def signup(request):
@@ -101,14 +104,19 @@ def uploadPost(request):
         return HttpResponse("<h1>HTTP 403 - Forbidden.</h1>")
 
 def userProfile(request, slug):
-    user = User.objects.filter(username=slug)
-
-    if list(user) == []:
+    try:
+        user = User.objects.filter(username=slug)
+        user_issues = Issue.objects.filter(author=slug)
+        params = dict(user.values()[0])
+        params["user_issues"] = list(user_issues.values())
+        if list(user) == []:
+            return HttpResponse("<h1>Username not found!</h1>")
+        elif request.user.username == slug:
+            return redirect('/forum/dashboard/')
+        else:
+            return render(request, 'forum/user.html', params)
+    except IndexError:
         return HttpResponse("<h1>Username not found!</h1>")
-    elif request.user.username == slug:
-        return redirect('/forum/dashboard/')
-    else:
-        return render(request, '/forum/user')
 
 def dashboard(request):
     if request.user.is_authenticated:

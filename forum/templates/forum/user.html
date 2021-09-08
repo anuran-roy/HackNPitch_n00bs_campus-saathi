@@ -4,6 +4,38 @@
 
 {% block body %}
 
-
+<div class="container">
+    <h1 class="my-4 mx-4">User profile: {{username}} </h1>
+    <p>
+        Name: {{first_name}} {{last_name}}
+    </p>
+    <p>
+        Username: {{ username }}
+    </p>
+    <p>
+        Joined on: {{ date_joined }} UTC<br>
+        Last login: {{ last_login }} UTC
+    </p>
+    <p>
+        Email: {{email}}
+    </p>
+    <h2 class="my-4 mx-4">Issues posted by {{username}}:</h2><br>
+    <table style="width:100%">
+        <tr>
+            <th>Issue</th>
+            <th>Date</th>
+            <th>Tracked</th>
+            <th>Link</th>
+        </tr>
+        {% for i in user_issues %}
+            <tr>
+                <td>{{ i.subject }}</td>
+                <td>{{ i.date }}</td>
+                <td>{{ i.tracked|yesno:"Yes,No" }}</td>
+                <td><a href="/forum/post/{{ i.slug }}" target="+_blank">View</td>
+            </tr>
+        {% endfor %}
+      </table>
+</div>
 
 {% endblock %}
