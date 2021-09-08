@@ -9,12 +9,27 @@
 <h1>{{ subject }}</h1>
 <h3>{{ summary }}</h3>
 <p>Posted on {{ date }} by {{ author }}</p>
+<p>Votes: {{votes}}</p>
 <article class="my-4 mx-4">
     <div class="container my-4 mx-4">
         {{ description }}
     </div>
 </article>
 <h3>Status of issue: {{ status }}</h3>
+<h3>Tracked: {{ tracked|yesno:"Yes,No" }}</h3>
+<div class="row">
+    <form method="POST" action="/forum/voteup/" class="my-2">
+        {% csrf_token %}
+        <input type="hidden" name="postId" value="{{id}}">
+        <input type="submit" value="Like" class="btn btn-outline-primary">
+    </form>
+    <!-- <br><br> -->
+    <form method="POST" action="/forum/votedown/" class="my-2">
+        {% csrf_token %}
+        <input type="hidden" name="postId" value="{{id}}">
+        <input type="submit" value="Dislike" class="btn btn-outline-primary">
+    </form>
+</div>
 </center>
 
 <div class="container">

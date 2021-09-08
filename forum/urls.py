@@ -15,6 +15,9 @@ urlpatterns = [
     # Comment related APIs
     path('postcomment/', views.postComment, name="PostComment"),
 
+    #Voting related APIs
+    path('voteup/', views.voteUp, name="VoteUp"),
+    path('votedown/', views.voteDown, name="VoteDown"),
     # Management related APIs
     path('login/', views.loggedin, name="Login"),
     path('signup/', views.signup, name="Signup"),

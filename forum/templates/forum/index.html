@@ -28,10 +28,13 @@
       <div class="card my-4 mx-4">
         <img src="/media/{{ i.image }}" class="card-img-top img-fluid" alt="..." style="aspect-ratio: 3/2;">
             <div class="card-body">
-              <h5 class="card-title">{{ i.subject }}</h5>
-              <p class="card-text">{{ i.summary|truncatechars:75 }}</p>
-              <p class="card-text">Posted on: {{ i.date }} by {{ i.author }}</p>
-              <p class="card-text">Tracked? {{ i.tracked|yesno:"Yes,No" }}</p>
+              <h5 class="card-title mx-1">{{ i.subject }}</h5>
+              <p class="card-text mx-1">{{ i.summary|truncatechars:75 }}</p>
+              <p class="card-text mx-1">Posted on: {{ i.date }} by {{ i.author }}</p>
+              <p class="card-text row mx-1">
+                Tracked? {{ i.tracked|yesno:"Yes,No" }}<br>
+                Votes: {{i.votes}}
+              </p>
               <a href="/forum/post/{{i.slug}}" class="btn btn-outline-primary">View Issue</a>
             </div>
       </div>

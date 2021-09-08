@@ -150,12 +150,29 @@ def postComment(request):
         return HttpResponse("<h1>HTTP 403 - Forbidden</h1>")
     return redirect(f'/forum/post/{slug}')
 
-def vote(request, num=0):
-    postId = request.POST.get("postId")
-    issues = Issue.objects.filter(id=postId).first()
-    slug = issues.slug
-    if num in [-1, 1] and list(issues) != []:
-        issues.votes += num
+def voteUp(request):
+    if request.method == 'POST':
+        postId = request.POST.get("postId")
+        issues = Issue.objects.filter(id=postId).first()
+        slug = issues.slug
+        # if num in [-1, 1] and list(issues) != []:
+        issues.votes += 1
+        issues.save()
+    else:
+        return HttpResponse("<h1>Forbidden</h1>")
+    
+    return redirect(f'/forum/post/{slug}')
+
+def voteDown(request):
+    if request.method == 'POST':
+        postId = request.POST.get("postId")
+        issues = Issue.objects.filter(id=postId).first()
+        slug = issues.slug
+        # if num in [-1, 1] and list(issues) != []:
+        issues.votes -= 1
+        issues.save()
+    else:
+        return HttpResponse("<h1>Forbidden</h1>")
     
     return redirect(f'/forum/post/{slug}')
 
