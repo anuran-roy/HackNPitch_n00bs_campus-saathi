@@ -13,17 +13,27 @@ class Issue(models.Model):
     date = models.DateField(auto_now_add=True)
     author = models.CharField(max_length=50, default="Anonymous")
     slug = models.SlugField(unique=True, max_length=100)
+    votes = models.IntegerField(default=0)
 
     def __str__(self):
         return self.subject
+
+    class Meta:
+        ordering = ['-votes', '-date']
 
 class Comment(models.Model):
     sno = models.AutoField(primary_key=True)
     description = models.TextField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    username = models.CharField(max_length=255, default='Anonymous')
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
+    # parent = models.ForeignKey('self', on_delete=models.CASCADE, default=None)
     timestamp = models.DateTimeField(auto_now_add=True)
+    # votes = models.IntegerField(default=0)
+    slug = models.SlugField(max_length=255, default='testing')
 
     def __str__(self):
-        return self.comment[:50] + '...'
+        return self.description[:50] + '...'
+
+    class Meta:
+        ordering = ['-timestamp'] # '-votes']

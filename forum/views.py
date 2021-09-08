@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.template.defaultfilters import slugify
 from random import randint
+from datetime import datetime
 
 # Create your views here.
 def index(request):
@@ -15,13 +16,13 @@ def search(request):
     return HttpResponse("<h1>Search function invoked!</h1>")
 
 def blogPost(request, slug):
-    post = Issue.objects.filter(slug=slug)
-    # comments = Comment.objects.filter(post=post.first())
-    if list(post) == []:
+    issue = Issue.objects.filter(slug=slug)
+    comments = Comment.objects.filter(issue=issue.first())
+    if list(issue) == []:
         return HttpResponse("<h1>404 - Post not available!</h1>")
     else:
-        params = dict(post.values()[0])
-        # params["comments"] = comments
+        params = dict(issue.values()[0])
+        params["comments"] = comments
         return render(request, 'forum/issue.html', params)
 
 def signup(request):
@@ -124,18 +125,38 @@ def dashboard(request):
         data = User.objects.filter(username = request.user.username)
         params = dict(data.values()[0])
         params["activity"] = activity
+
+        comments_activity = list(Comment.objects.filter(username=request.user.username))
+        params["comments"] = comments_activity
+        print(params)
         # return HttpResponse(f"<h1>This will be the Dashboard for {request.user.username}</h1>")
         return render(request, 'forum/dashboard.html', params)
     else:
         return redirect('/forum/login')
 
-def postComment(request, slug):
+def postComment(request):
     if request.method == 'POST':
-        # sno = 
         comment = request.POST.get("comment")
         user = request.user
-        postSno = request.POST.get("issueSno")
-        issues = Issue.objects.get(sno=postSno)
+        postId = request.POST.get("postId")
+        slug = request.POST.get("postSlug")
+        issues = Issue.objects.get(id=postId)
+        username = request.user.username
+        # comment_slug = issue_slug + '-' + datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+
+        obj = Comment(description=comment, issue=issues, user=user, username=username, slug=slug)
+        obj.save()
     else:
-        pass
+        return HttpResponse("<h1>HTTP 403 - Forbidden</h1>")
     return redirect(f'/forum/post/{slug}')
+
+def vote(request, num=0):
+    postId = request.POST.get("postId")
+    issues = Issue.objects.filter(id=postId).first()
+    slug = issues.slug
+    if num in [-1, 1] and list(issues) != []:
+        issues.votes += num
+    
+    return redirect(f'/forum/post/{slug}')
+
+    
