@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-x@b4v$1j+v0g*iu%3fe0bnkb+_2#mkd&1tsrnjzns6y!hvf%c_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['campus-saathi.ml', 'localhost']
 
 
 # Application definition

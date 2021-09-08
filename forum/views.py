@@ -79,7 +79,7 @@ def newUser(request):
             myuser.roll = request.POST.get('rollno')
             myuser.save()
             # messages.success(request, "Your account has been successfully created!")
-            return HttpResponse("<h1>Your account has been successfully created!</h1>")
+            return HttpResponse(f"<h1>Your account has been successfully created! Your username is: {myuser.username}. Save it somewhere.</h1>")
         else:
             return HttpResponse("<h1>Error - Passwords don't match.</h1>")
     else:
@@ -164,16 +164,18 @@ def voteUp(request):
     return redirect(f'/forum/post/{slug}')
 
 def voteDown(request):
-    if request.method == 'POST':
-        postId = request.POST.get("postId")
-        issues = Issue.objects.filter(id=postId).first()
-        slug = issues.slug
-        # if num in [-1, 1] and list(issues) != []:
-        issues.votes -= 1
-        issues.save()
-    else:
-        return HttpResponse("<h1>Forbidden</h1>")
-    
-    return redirect(f'/forum/post/{slug}')
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            postId = request.POST.get("postId")
+            issues = Issue.objects.filter(id=postId).first()
+            slug = issues.slug
+            # if num in [-1, 1] and list(issues) != []:
+            issues.votes -= 1
+            issues.save()
+        else:
+            return HttpResponse("<h1>Forbidden</h1>")
 
+        return redirect(f'/forum/post/{slug}')
+    else:
+        return redirect('/forum/login/')
     
