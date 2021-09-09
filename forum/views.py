@@ -10,6 +10,7 @@ from datetime import datetime
 # Create your views here.
 def index(request):
     params = {'issues': Issue.objects.all()}
+    params["page_title"] = "Posted Issues"
     return render(request, 'forum/index.html', params)
 
 def search(request):
@@ -208,3 +209,23 @@ def voteDown(request):
     else:
         return redirect('/forum/login/')
     
+def search(request):
+    issues = list(Issue.objects.all())
+    query = request.POST.get('search')
+
+    results_list = []
+
+    init = datetime.now()
+    for i in issues:
+        idict = i.__dict__
+
+        for j in idict.keys():
+            if j != '_state':
+                if isinstance(idict[j],str):
+                    if query in idict[j]:
+                        results_list.append(i)
+    
+    results_list = list(set(results_list))
+    params = {'issues': results_list}
+    params["page_title"] = f"Showing {len(results_list)} search results for '{query}' in {(datetime.now() - init).total_seconds()} seconds"
+    return render(request, 'forum/index.html', params)

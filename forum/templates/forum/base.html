@@ -49,8 +49,9 @@
                 <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
               </li> -->
             </ul>
-            <form class="d-flex mx-4">
-              <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+            <form class="d-flex mx-4" action="/forum/search/" method="POST">
+              {% csrf_token %}
+              <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search">
               <button class="btn btn-outline-success" type="submit">Search</button>
             </form>
             <a href="/forum/login/"><button class="btn btn-success mx-2">Login</button></a>

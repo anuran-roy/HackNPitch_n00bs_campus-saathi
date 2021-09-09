@@ -18,6 +18,7 @@ urlpatterns = [
     #Voting related APIs
     path('voteup/', views.voteUp, name="VoteUp"),
     path('votedown/', views.voteDown, name="VoteDown"),
+
     # Management related APIs
     path('login/', views.loggedin, name="Login"),
     path('signup/', views.signup, name="Signup"),
@@ -28,4 +29,7 @@ urlpatterns = [
     # Interface related APIs
     path('dashboard/', views.dashboard, name="Dashboard"),
     path('user/<str:slug>', views.userProfile, name="UserProfile"),
+
+    # Search APIs
+    path('search/', views.search, name="Search"),
 ]
