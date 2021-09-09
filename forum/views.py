@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, HttpResponse
-from .models import Issue, Comment
+from .models import Issue, Comment, UserProfile
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -69,15 +69,20 @@ def newUser(request):
         email = request.POST.get('email')
         password = request.POST.get('passwd', None)
         cpassword = request.POST.get('cpasswd', None)
-        username = slugify(email[:email.find('@')].lower()+'-'+str(randint(1,10000)))
+        username = slugify(email[:email.find('@')].lower()+'-'+str(randint(1,1000000)))
         if cpassword == password:
             myuser = User.objects.create_user(username, email, password)
+
             # return HttpResponse("<h1>This is the redirect page.<h1>")
             myuser.first_name = request.POST.get('fname')
             myuser.last_name = request.POST.get('lname')
             myuser.middle_name = request.POST.get('mname', None)
-            myuser.roll = request.POST.get('rollno')
+            # myuser.roll = request.POST.get('rollno')
+            # myuser.reputation = 0
             myuser.save()
+
+            myprofile = UserProfile(reputation=0, rollno = request.POST.get('rollno'), user=myuser, username=username)
+            myprofile.save()
             # messages.success(request, "Your account has been successfully created!")
             return HttpResponse(f"<h1>Your account has been successfully created! Your username is: {myuser.username}. Save it somewhere.</h1>")
         else:
@@ -87,18 +92,19 @@ def newUser(request):
 
 def uploadPost(request):
     if request.method == "POST":
+        user = request.user
         subject = request.POST.get('subject')
         summary = request.POST.get('summary')
         description = request.POST.get('description')
         image = request.FILES.get('myfile')
-        print(image)
+        # print(image)
         author = request.user.username
         slug = slugify(f"{subject.lower()}-{author.lower()}")
         post = None
         if image is not None:
-            post = Issue(subject=subject, summary=summary, description=description, image=image, author=author, slug=slug)
+            post = Issue(user=user, subject=subject, summary=summary, description=description, image=image, author=author, slug=slug)
         else:
-            post = Issue(subject=subject, summary=summary, description=description, author=author, slug=slug)
+            post = Issue(user=user, subject=subject, summary=summary, description=description, author=author, slug=slug)
         post.save()
         return redirect('/forum/')
     else:
@@ -121,14 +127,17 @@ def userProfile(request, slug):
 
 def dashboard(request):
     if request.user.is_authenticated:
-        activity = list(Issue.objects.filter(author=request.user.username))
+        activity = list(Issue.objects.filter(user=request.user))
         data = User.objects.filter(username = request.user.username)
+        profile = UserProfile.objects.filter(username = request.user.username).first()
         params = dict(data.values()[0])
         params["activity"] = activity
+        params["rollno"] = profile.__dict__["rollno"]
+        params["reputation"] = profile.__dict__["reputation"]
 
         comments_activity = list(Comment.objects.filter(username=request.user.username))
         params["comments"] = comments_activity
-        print(params)
+        # print(params)
         # return HttpResponse(f"<h1>This will be the Dashboard for {request.user.username}</h1>")
         return render(request, 'forum/dashboard.html', params)
     else:
@@ -151,30 +160,50 @@ def postComment(request):
     return redirect(f'/forum/post/{slug}')
 
 def voteUp(request):
-    if request.method == 'POST':
-        postId = request.POST.get("postId")
-        issues = Issue.objects.filter(id=postId).first()
-        slug = issues.slug
-        # if num in [-1, 1] and list(issues) != []:
-        issues.votes += 1
-        issues.save()
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            postId = request.POST.get("postId")
+            author = request.POST.get("poster")
+            issues = Issue.objects.filter(id=postId).first()
+            user = User.objects.filter(username=author).first()
+            userprofile = UserProfile.objects.filter(username=author).first()
+            # print("UserProfile:", userprofile.__dict__)
+            # print("\n\nUser:", user.__dict__)
+            slug = issues.slug
+            # if num in [-1, 1] and list(issues) != []:
+            issues.votes += 1
+            userprofile.reputation += 1
+            issues.save()
+            user.save()
+            userprofile.save()
+        else:
+            return HttpResponse("<h1>Forbidden</h1>")
+        
+        return redirect(f'/forum/post/{slug}')
     else:
-        return HttpResponse("<h1>Forbidden</h1>")
-    
-    return redirect(f'/forum/post/{slug}')
+        return redirect('/forum/login/')
 
 def voteDown(request):
     if request.user.is_authenticated:
         if request.method == 'POST':
             postId = request.POST.get("postId")
+            author = request.POST.get("poster")
             issues = Issue.objects.filter(id=postId).first()
+            user = User.objects.filter(username=author).first()
+            userprofile = UserProfile.objects.filter(username=author).first()
+            # print("UserProfile:", userprofile.__dict__)
+            # print("\n\nUser:", user.__dict__)
             slug = issues.slug
             # if num in [-1, 1] and list(issues) != []:
             issues.votes -= 1
+            userprofile.reputation -= 1
+            # print(userprofile.__dict__)
             issues.save()
+            user.save()
+            userprofile.save()
         else:
             return HttpResponse("<h1>Forbidden</h1>")
-
+        
         return redirect(f'/forum/post/{slug}')
     else:
         return redirect('/forum/login/')

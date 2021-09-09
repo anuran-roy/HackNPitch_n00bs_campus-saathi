@@ -215,8 +215,26 @@ body {
   overflow-y: scroll;
   /* display: block; */
   height: 250px !important;
+
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+th {
+  cursor: pointer;
 }
 
+th, td {
+  text-align: left;
+  padding: 16px;
+}
+
+.card_scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.reputation_text{
+  font-size: 10rem;
+}
 /* End of custom CSS */
 
 /* Clock Styles Starts Here */

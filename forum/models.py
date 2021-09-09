@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class Issue(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     subject = models.CharField(max_length=100, default="(Not available)")
     summary = models.TextField(max_length=200, default="(Not available)")
     description = models.TextField(max_length=750, default="(Not available)")
@@ -37,3 +38,13 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ['-timestamp'] # '-votes']
+
+class UserProfile(models.Model):
+    sno = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    username = models.CharField(max_length=255, default='Anonymous')
+    reputation = models.IntegerField(default=0)
+    rollno = models.CharField(max_length=20, default='')
+
+    def __str__(self):
+        return self.username

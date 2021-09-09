@@ -10,6 +10,8 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
     />
     <link rel="stylesheet" href="{% static 'forum/dashboard/styles.css' %}" />
+    <style>
+    </style>
   </head>
   <body>
     
@@ -23,10 +25,10 @@
         
 
 
-          {% comment %} <li class="active_link">
-            <a href="#"><i class="fas fa-tint"></i></a>
+          <li class="active_link">
+            <a href="/forum/"><i class="fas fa-home"></i></a>
           </li>
-          <li>
+          {% comment %} <li>
             <a href="#"><i class="fab fa-angellist"></i></a>
           </li>
           <li>
@@ -67,14 +69,15 @@
                 ></span></a>
               </p>
             </div>
-            <div class="card1_table_wrapper">
-              <table class="card1_table card_scroll">
+            <div class="card1_table_wrapper card_scroll">
+              <table class="card1_table card_scroll" id="PostsTable">
                 <thead class="card1_table_head">
                   <tr>
-                    <th>Subject</th>
-                    <th>Date</th>
-                    <th>Tracked</th>
-                    <th>Link</th>
+                    <th onclick="sortTable(0,'PostsTable')">Subject</th>
+                    <th onclick="sortTable(1,'PostsTable')">Date</th>
+                    <th onclick="sortTable(2,'PostsTable')">Votes</th>
+                    <th onclick="sortTable(3,'PostsTable')">Tracked</th>
+                    <th onclick="sortTable(4,'PostsTable')">Link</th>
                   </tr>
                 </thead>
                 <tbody class="card1_table_tbody">
@@ -83,6 +86,7 @@
                       {% comment %} <td><i class="positiveIcon fas fa-check"></i> John Doe</td> {% endcomment %}
                       <td>{{ i.subject }}</td>
                       <td>{{ i.date }}</td>
+                      <td>{{ i.votes }}</td>
                       <td>{{ i.tracked|yesno:"Yes,No" }}</td>
                       <td>
                         <a href="/forum/post/{{ i.slug }}" target="_blank"><button class="btn btn-primary">Go</button></a>
@@ -109,7 +113,7 @@
         </div>
         <div class="row row2">
           <div class="card card3">
-            <div class="weather_title">
+            {% comment %} <div class="weather_title">
               <button class="btn btn-secondary">Kolkata</button>
               <span>16:05</span>
             </div>
@@ -126,7 +130,9 @@
               <div class="right_degree">
                 <p>19&#176;</p>
               </div>
-            </div>
+            </div> {% endcomment %}
+            <h2>Reputation</h2>
+            <center><p class="car1_text reputation_text">{{reputation}}</p></center>
           </div>
           <div class="card card4">
             <div class="card1_title_wrapper">
@@ -136,12 +142,12 @@
               </p>
             </div>
             <div class="card1_table_wrapper card_scroll">
-              <table class="card1_table card_scroll">
+              <table class="card1_table card_scroll" id="CommentsTable">
                 <thead class="card1_table_head">
                   <tr>
-                    <th>Comments</th>
-                    <th>Date</th>
-                    <th>Link</th>
+                    <th onclick="sortTable(0,'CommentsTable')">Comments</th>
+                    <th onclick="sortTable(1,'CommentsTable')">Date</th>
+                    <th onclick="sortTable(2,'CommentsTable')">Link</th>
                   </tr>
                 </thead>
                 <tbody class="card1_table_tbody card_scroll">
@@ -149,7 +155,8 @@
                     <tr>
                       <td>{{i.description|truncatechars:50}}</td>
                       <td>{{i.timestamp}}</td>
-                      <td><a href="/forum/post/{{i.slug}}" target="_blank"><button class="btn btn-primary">Go</button></a></td>
+                      <td><a href="/forum/post/{{i.slug}}" target="_blank"><button class="btn btn-primary">Go</button></a>
+                      </td>
                     </tr>
                   {% endfor %}
                 </tbody>
@@ -163,6 +170,61 @@
 
     {% comment %} <script src="{% static 'forum/dashboard/main.js' %}"></script> {% endcomment %}
     <script>
+      function sortTable(n, tableName) {
+        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        table = document.getElementById(tableName);
+        switching = true;
+        //Set the sorting direction to ascending:
+        dir = "asc"; 
+        /*Make a loop that will continue until
+        no switching has been done:*/
+        while (switching) {
+          //start by saying: no switching is done:
+          switching = false;
+          rows = table.rows;
+          /*Loop through all table rows (except the
+          first, which contains table headers):*/
+          for (i = 1; i < (rows.length - 1); i++) {
+            //start by saying there should be no switching:
+            shouldSwitch = false;
+            /*Get the two elements you want to compare,
+            one from current row and one from the next:*/
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+            /*check if the two rows should switch place,
+            based on the direction, asc or desc:*/
+            if (dir == "asc") {
+              if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                //if so, mark as a switch and break the loop:
+                shouldSwitch= true;
+                break;
+              }
+            } else if (dir == "desc") {
+              if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                //if so, mark as a switch and break the loop:
+                shouldSwitch = true;
+                break;
+              }
+            }
+          }
+          if (shouldSwitch) {
+            /*If a switch has been marked, make the switch
+            and mark that a switch has been done:*/
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            //Each time a switch is done, increase this count by 1:
+            switchcount ++;      
+          } else {
+            /*If no switching has been done AND the direction is "asc",
+            set the direction to "desc" and run the while loop again.*/
+            if (switchcount == 0 && dir == "asc") {
+              dir = "desc";
+              switching = true;
+            }
+          }
+        }
+      }
+
       const clockDesigns = ["clock", "clock2", "clock3", "clock4", "clock5"];
       const maxLength = clockDesigns.length;
       let startIndex = 0;

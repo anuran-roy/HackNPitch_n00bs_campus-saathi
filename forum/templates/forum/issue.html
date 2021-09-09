@@ -21,12 +21,14 @@
     <form method="POST" action="/forum/voteup/" class="my-2">
         {% csrf_token %}
         <input type="hidden" name="postId" value="{{id}}">
+        <input type="hidden" name="poster" value="{{author}}">
         <input type="submit" value="Like" class="btn btn-outline-primary">
     </form>
     <!-- <br><br> -->
     <form method="POST" action="/forum/votedown/" class="my-2">
         {% csrf_token %}
-        <input type="hidden" name="postId" value="{{id}}">
+        <input type="hidden" name="postId" value="{{id}}">        
+        <input type="hidden" name="poster" value="{{author}}">
         <input type="submit" value="Dislike" class="btn btn-outline-primary">
     </form>
 </div>
@@ -35,12 +37,12 @@
 <div class="container">
     <div class="row">
         <h2>Comments ({{comments|length}})</h2>
-        <a href="/forum/postcomment/">Post a comment</a>
+        <a href="#commentArea">Post a comment</a>
     </div>
     <form method="POST" action="/forum/postcomment/" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-floating my-4 mx-4">
-            <textarea class="form-control" style="height: 250px;" placeholder="Describe your issue" id="floatingTextarea2" style="height: 100px" name="comment" required></textarea>
+            <textarea class="form-control" style="height: 250px;" placeholder="Describe your issue" id="commentArea" style="height: 100px" name="comment" required></textarea>
             <label for="floatingTextarea2">Comment*</label>
         </div>
         <!-- <div class="my-5 mx-5">
