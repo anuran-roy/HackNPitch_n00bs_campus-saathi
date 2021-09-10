@@ -10,33 +10,36 @@
 import requests
 import json
 
+############# PyTorch Spam Filter Implementation #############
+
+# class LogisticRegression(nn.Module):
+#     def __init__(self):
+#         super(LogisticRegression, self).__init__()
+#         self.linear1 = nn.Linear(10000, 100)
+#         self.linear2 = nn.Linear(100, 10)
+#         self.linear3 = nn.Linear(10, 2)
+
+#     def forward(self, x):
+#         x = F.relu(self.linear1(x))
+#         x = F.relu(self.linear2(x))
+#         x = self.linear3(x)
+#         return x
 
 
-class LogisticRegression(nn.Module):
-    def __init__(self):
-        super(LogisticRegression, self).__init__()
-        self.linear1 = nn.Linear(10000, 100)
-        self.linear2 = nn.Linear(100, 10)
-        self.linear3 = nn.Linear(10, 2)
+# def getResponse(text):
+#     model = LogisticRegression()
+#     model.load_state_dict(torch.load("spam_filter.pth"))
+#     model.eval()
 
-    def forward(self, x):
-        x = F.relu(self.linear1(x))
-        x = F.relu(self.linear2(x))
-        x = self.linear3(x)
-        return x
+#     max_words = 10000
+#     cv = CountVectorizer(max_features=max_words, stop_words='english')
+#     sparse_matrix = cv.fit_transform(data['email']).toarray()
 
+#     return model
 
-def getResponse(text):
-    model = LogisticRegression()
-    model.load_state_dict(torch.load("spam_filter.pth"))
-    model.eval()
+############# End Implementation #############
 
-    max_words = 10000
-    cv = CountVectorizer(max_features=max_words, stop_words='english')
-    sparse_matrix = cv.fit_transform(data['email']).toarray()
-
-    return model
-
+############# Oopspam API Implementation #############
 
 def oopspam(text, ip):
     pass
@@ -52,6 +55,10 @@ def oopspam(text, ip):
     response = requests.request("POST", url, data=payload, headers=headers)
 
     print(response.text)
+
+############# End Oopspam API Implementation #############
+
+############# Plino API Implementation #############
 
 def plino(text):
     api_url = "https://plino.herokuapp.com/api/v1/classify/"
@@ -71,3 +78,5 @@ def plino(text):
 if __name__ == "__main__":
     m = input("Enter a message:")
     plino(m)
+
+############# End Plino API Implementation #############

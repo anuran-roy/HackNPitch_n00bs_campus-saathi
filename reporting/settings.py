@@ -32,15 +32,24 @@ ALLOWED_HOSTS = ['campus-saathi.ml', 'localhost']
 # Application definition
 
 INSTALLED_APPS = [
+    ## Third party apps
     # 'whitenoise.runserver_nostatic',
+
+    ## My apps
     'forum.apps.ForumConfig',
     'home.apps.HomeConfig',
+
+    ## Default Django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    ## Django cleanup
+    'django_cleanup.apps.CleanupConfig',
+    'django_unused_media',
 ]
 
 MIDDLEWARE = [

@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.template.defaultfilters import slugify
 from random import randint
 from datetime import datetime
-from .spamfilter import getModelObject, oopspam, plino
+from .spamfilter import plino
 
 # Create your views here.
 def index(request):
@@ -137,8 +137,8 @@ def dashboard(request):
         profile = UserProfile.objects.filter(username = request.user.username).first()
         params = dict(data.values()[0])
         params["activity"] = activity
-        params["rollno"] = profile.__dict__["rollno"]
-        params["reputation"] = profile.__dict__["reputation"]
+        params["rollno"] = profile.__dict__["rollno"] if not request.user.is_superuser else "NA"
+        params["reputation"] = profile.__dict__["reputation"] if not request.user.is_superuser else "Inf"
 
         comments_activity = list(Comment.objects.filter(username=request.user.username))
         params["comments"] = comments_activity
@@ -173,13 +173,14 @@ def voteUp(request):
             author = request.POST.get("poster")
             issues = Issue.objects.filter(id=postId).first()
             user = User.objects.filter(username=author).first()
-            userprofile = UserProfile.objects.filter(username=author).first()
+            userprofile = UserProfile.objects.filter(username=author).first() if not (user.is_superuser or user.is_staff) else None
             # print("UserProfile:", userprofile.__dict__)
             # print("\n\nUser:", user.__dict__)
             slug = issues.slug
             # if num in [-1, 1] and list(issues) != []:
-            issues.votes += 1
-            userprofile.reputation += 1
+            if user is not None:
+                issues.votes += 1
+                userprofile.reputation += 1
             issues.save()
             user.save()
             userprofile.save()
@@ -197,14 +198,14 @@ def voteDown(request):
             author = request.POST.get("poster")
             issues = Issue.objects.filter(id=postId).first()
             user = User.objects.filter(username=author).first()
-            userprofile = UserProfile.objects.filter(username=author).first()
+            userprofile = UserProfile.objects.filter(username=author).first() if not (user.is_superuser or user.is_staff) else None
             # print("UserProfile:", userprofile.__dict__)
             # print("\n\nUser:", user.__dict__)
             slug = issues.slug
             # if num in [-1, 1] and list(issues) != []:
-            issues.votes -= 1
-            userprofile.reputation -= 1
-            # print(userprofile.__dict__)
+            if user is not None:
+                issues.votes -= 1
+                userprofile.reputation -= 1
             issues.save()
             user.save()
             userprofile.save()
