@@ -32,7 +32,7 @@ ALLOWED_HOSTS = ['campus-saathi.ml', 'localhost']
 # Application definition
 
 INSTALLED_APPS = [
-    # 'authapp.apps.AuthappConfig',
+    # 'whitenoise.runserver_nostatic',
     'forum.apps.ForumConfig',
     'home.apps.HomeConfig',
     'django.contrib.admin',
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -133,3 +134,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
+
+# WhiteNoise Variables
+
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

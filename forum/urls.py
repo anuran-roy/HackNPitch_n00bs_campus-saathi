@@ -6,6 +6,7 @@ from . import views
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path('', views.index),
+    path('leaderboard/',views.StudentLeaderBoard, name="StudentLeaderBoard"),
 
     # Post related APIs
     path('post/<str:slug>', views.blogPost, name="PostView"),

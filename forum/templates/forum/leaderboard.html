@@ -1,0 +1,55 @@
+{% extends 'forum/base.html' %}
+
+{% block title %}Forum::Campus E-Governance{% endblock %}
+
+{% block style %}
+    .card{
+      transition: transform 0.3s;
+    }
+    .card:hover { 
+      transform: scale(1.05);
+    }
+    .btn{
+      transition: transform 0.3s;
+    }
+    .btn:hover { 
+      transform: scale(1.05);
+    }
+{% endblock %}
+{% block body %}
+<!-- <h1>This will be the forum homepage</h1> -->
+<center><a href="newpost/" class="btn btn-outline-danger my-4" style="width: 70%;">Post an issue</a></center>
+
+<h2 align="center">{{ page_title }}:</h2>
+
+<div class="row my-4 mx-4">
+    {% for i in users|slice:":" %}
+    <div class="col-sm-4">
+      <div class="card my-4 mx-4">
+        {% comment %} <img src="/media/{{ i.image }}" class="card-img-top img-fluid" alt="..." style="aspect-ratio: 3/2;"> {% endcomment %}
+            <div class="card-body">
+              <h5 class="card-title mx-1">{{ i.reputation }}</h5>
+              <p class="card-text mx-1">{{ i.username|truncatechars:75 }}</p>
+              {% comment %} <p class="card-text mx-1">Posted on: {{ i.date }} by {{ i.author }}</p>
+              <p class="card-text row mx-1">
+                Tracked? {{ i.tracked|yesno:"Yes,No" }}<br>
+                Votes: {{i.votes}}
+              </p> {% endcomment %}
+              <a href="/forum/user/{{i.username}}" class="btn btn-outline-primary">View Profile</a>
+            </div>
+      </div>
+    </div>
+    {% endfor %}
+    <!-- <div class="col-sm-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Special title treatment</h5>
+          <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+          <a href="#" class="btn btn-primary">Go somewhere</a>
+        </div>
+      </div>
+    </div> -->
+  </div>
+
+
+{% endblock %}

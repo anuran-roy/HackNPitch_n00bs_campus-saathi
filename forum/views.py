@@ -6,12 +6,16 @@ from django.contrib.auth import authenticate, login, logout
 from django.template.defaultfilters import slugify
 from random import randint
 from datetime import datetime
+from .spamfilter import getModelObject, oopspam, plino
 
 # Create your views here.
 def index(request):
-    params = {'issues': Issue.objects.all()}
-    params["page_title"] = "Posted Issues"
-    return render(request, 'forum/index.html', params)
+    if request.user.is_authenticated:
+        params = {'issues': Issue.objects.all()}
+        params["page_title"] = "Posted Issues"
+        return render(request, 'forum/index.html', params)
+    else:
+        return redirect('/forum/login')
 
 def search(request):
     return HttpResponse("<h1>Search function invoked!</h1>")
@@ -153,9 +157,11 @@ def postComment(request):
         issues = Issue.objects.get(id=postId)
         username = request.user.username
         # comment_slug = issue_slug + '-' + datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-
-        obj = Comment(description=comment, issue=issues, user=user, username=username, slug=slug)
-        obj.save()
+        if not plino(comment):
+            obj = Comment(description=comment, issue=issues, user=user, username=username, slug=slug)
+            obj.save()
+        else:
+            return HttpResponse("<h1>Your Comment has been marked as spam.</h1>")
     else:
         return HttpResponse("<h1>HTTP 403 - Forbidden</h1>")
     return redirect(f'/forum/post/{slug}')
@@ -222,10 +228,18 @@ def search(request):
         for j in idict.keys():
             if j != '_state':
                 if isinstance(idict[j],str):
-                    if query in idict[j]:
+                    if query.lower() in idict[j].lower():
                         results_list.append(i)
     
     results_list = list(set(results_list))
     params = {'issues': results_list}
     params["page_title"] = f"Showing {len(results_list)} search results for '{query}' in {(datetime.now() - init).total_seconds()} seconds"
     return render(request, 'forum/index.html', params)
+
+def StudentLeaderBoard(request):
+    users = list(UserProfile.objects.all())
+    users.sort(key = lambda x: x.reputation, reverse=True)
+    params = {}
+    params["page_title"] = "Student Leaderboard"
+    params["users"] = users
+    return render(request, 'forum/leaderboard.html', params)

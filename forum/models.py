@@ -15,6 +15,7 @@ class Issue(models.Model):
     author = models.CharField(max_length=50, default="Anonymous")
     slug = models.SlugField(unique=True, max_length=100)
     votes = models.IntegerField(default=0)
+    tvotes = models.IntegerField(default=0)
 
     def __str__(self):
         return self.subject
@@ -45,6 +46,12 @@ class UserProfile(models.Model):
     username = models.CharField(max_length=255, default='Anonymous')
     reputation = models.IntegerField(default=0)
     rollno = models.CharField(max_length=20, default='')
+    facebook = models.CharField(max_length=150, default='#')
+    twitter = models.CharField(max_length=150, default='#')
+    instagram = models.CharField(max_length=150, default='#')
+    linkedin = models.CharField(max_length=150, default='#')
 
     def __str__(self):
         return self.username
+
+# class TeacherProfile(models.Model):
