@@ -356,6 +356,7 @@ def TagsProcessor(request, mode, args):
 def showTag(request, slug):
     tags = Tags.objects.filter(label=slug).first()
     if tags is not None: 
-        return HttpResponse(f"<h1>This is the tag page of {slug}</h1>")
+        # return HttpResponse(f"<h1>This is the tag page of {slug}</h1>")
+        return render(request, 'forum/tag.html', tags.__dict__)
     else:
         return HttpResponse(f"<h1>Tag {slug} doesn't exist!</h1>")

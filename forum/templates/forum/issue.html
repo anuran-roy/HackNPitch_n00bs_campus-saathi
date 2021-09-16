@@ -11,7 +11,7 @@
 <p>Posted on {{ date }} by <a href="/forum/user/{{author}}" style="cursor: pointer">{{ author }}</a></p>
 <p>Tags: 
     {% for i in tags %}
-        {{i}} 
+        <a href="/forum/tag/{{i}}">{{i}}</a> 
     {% endfor %}
 </p>
 <p>Votes: {{votes}}</p>
