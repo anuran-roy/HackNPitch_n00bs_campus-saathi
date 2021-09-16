@@ -17,12 +17,22 @@
             </div>
         </div>
         <div class="form-floating my-4 mx-4">
-            <textarea class="form-control" style="height: 250px;" placeholder="Describe your issue" id="floatingTextarea2" style="height: 100px" name="description" required></textarea>
+            <textarea class="form-control" style="height: 250px;" placeholder="Describe your issue" id="floatingTextarea2" name="description" required></textarea>
             <label for="floatingTextarea2">Description*</label>
         </div>
+        <div class="mb-3 my-4 mx-4">
+            <div class="form-floating mb-4 my-4 mx-4">
+                <input type="text" class="form-control" id="tags" placeholder="Enter the tags" name="tags">
+                <label for="subject" class="form-label">Tags (separated by commas)</label>
+            </div>
+        </div>
         <div class="my-5 mx-5">
-            <div class="my-4">Upload image:</div>
+            <div class="my-2">Upload image:</div>
             <input type="file" id="myFile" name="myfile">
+        </div>
+        <div class="form-check form-switch mx-4 my-1">
+            <input class="form-check-input" name="anonymize" type="checkbox" id="flexSwitchCheckDefault">
+            <label class="form-check-label" for="flexSwitchCheckDefault">Post as anonymous user</label>
         </div>
         <center><input type="submit" value="submit" class="btn btn-outline-primary btn-lg"></center>
     </form>

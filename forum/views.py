@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, HttpResponse
-from .models import Issue, Comment, UserProfile
+from .models import Issue, Comment, UserProfile, TeacherProfile, Tags
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -27,6 +27,7 @@ def blogPost(request, slug):
         return HttpResponse("<h1>404 - Post not available!</h1>")
     else:
         params = dict(issue.values()[0])
+        print(f"\n\n\n{params}\n\n\n")
         params["comments"] = comments
         return render(request, 'forum/issue.html', params)
 
@@ -75,6 +76,7 @@ def newUser(request):
         password = request.POST.get('passwd', None)
         cpassword = request.POST.get('cpasswd', None)
         username = slugify(email[:email.find('@')].lower()+'-'+str(randint(1,1000000)))
+        role = request.POST.get('role', 'student')
         if cpassword == password:
             myuser = User.objects.create_user(username, email, password)
 
@@ -85,8 +87,11 @@ def newUser(request):
             # myuser.roll = request.POST.get('rollno')
             # myuser.reputation = 0
             myuser.save()
-
-            myprofile = UserProfile(reputation=0, rollno = request.POST.get('rollno'), user=myuser, username=username)
+            
+            if role == 'student':
+                myprofile = UserProfile(reputation=0, rollno = request.POST.get('rollno'), user=myuser, username=username)
+            elif role == 'teacher':
+                myprofile = TeacherProfile(reputation=0, empno = request.POST.get('rollno'), user=myuser, username=username, tags=[{"tags": []}])
             myprofile.save()
             # messages.success(request, "Your account has been successfully created!")
             return HttpResponse(f"<h1>Your account has been successfully created! Your username is: {myuser.username}. Save it somewhere.</h1>")
@@ -102,14 +107,18 @@ def uploadPost(request):
         summary = request.POST.get('summary')
         description = request.POST.get('description')
         image = request.FILES.get('myfile')
+        is_anonymous = request.POST.get("anonymize", "off")
         # print(image)
-        author = request.user.username
+        author = request.user.username if is_anonymous == "off" else "Anonymous"
         slug = slugify(f"{subject.lower()}-{author.lower()}")
+
+        tags = TagsProcessor(request, "post", {"author": author, "slug": slug})
+
         post = None
         if image is not None:
-            post = Issue(user=user, subject=subject, summary=summary, description=description, image=image, author=author, slug=slug)
+            post = Issue(user=user, subject=subject, summary=summary, description=description, image=image, author=author, slug=slug, tags=tags)
         else:
-            post = Issue(user=user, subject=subject, summary=summary, description=description, author=author, slug=slug)
+            post = Issue(user=user, subject=subject, summary=summary, description=description, author=author, slug=slug, tags=tags)
         post.save()
         return redirect('/forum/')
     else:
@@ -135,36 +144,73 @@ def dashboard(request):
         activity = list(Issue.objects.filter(user=request.user))
         data = User.objects.filter(username = request.user.username)
         profile = UserProfile.objects.filter(username = request.user.username).first()
+
+        if request.user.is_superuser:
+            return redirect("/admin/")
+        isTeacher = False
+
+        if(profile == None):
+            profile = TeacherProfile.objects.filter(username = request.user.username).first()
+            isTeacher = True
+
         params = dict(data.values()[0])
         params["activity"] = activity
         params["rollno"] = profile.__dict__["rollno"] if not request.user.is_superuser else "NA"
         params["reputation"] = profile.__dict__["reputation"] if not request.user.is_superuser else "Inf"
 
+        if isTeacher:
+            params["tags"] = profile.__dict__["tags"]
+
         comments_activity = list(Comment.objects.filter(username=request.user.username))
         params["comments"] = comments_activity
         # print(params)
         # return HttpResponse(f"<h1>This will be the Dashboard for {request.user.username}</h1>")
-        return render(request, 'forum/dashboard.html', params)
+        if isTeacher:
+            a = list(Tags.objects.all())
+            username = request.user.username
+            ls = []
+            
+            for i in a:
+                if username in i.usernames:
+                    ls.append(i)
+            
+            params["notifications"] = ls
+            myprof = TeacherProfile.objects.filter(username=username).first()
+            ls2 = [i.label for i in ls]
+            myprof.tags["tags"] = ls2
+            myprof.save()
+            
+            print(f"\n\n\n{ls}\n\n\n")
+
+        if isTeacher:
+            return render(request, 'forum/staff/dashboard.html', params)
+        else:
+            return render(request, 'forum/student/dashboard.html', params)
     else:
         return redirect('/forum/login')
+
 
 def postComment(request):
     if request.method == 'POST':
         comment = request.POST.get("comment")
         user = request.user
         postId = request.POST.get("postId")
+        print("\n\n\n\n" + postId + str(type(postId)) + "\n\n\n")
         slug = request.POST.get("postSlug")
-        issues = Issue.objects.get(id=postId)
+        issues = Issue.objects.filter(sno=postId).first()
         username = request.user.username
+        tags = TagsProcessor(request, "comment", {"author": username, "slug": slug})
+
         # comment_slug = issue_slug + '-' + datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
         if not plino(comment):
             obj = Comment(description=comment, issue=issues, user=user, username=username, slug=slug)
             obj.save()
         else:
-            return HttpResponse("<h1>Your Comment has been marked as spam.</h1>")
+            return HttpResponse("<h1>Really very very sorry fam,<br>your comment has been marked as spam.</h1>")
     else:
         return HttpResponse("<h1>HTTP 403 - Forbidden</h1>")
     return redirect(f'/forum/post/{slug}')
+
 
 def voteUp(request):
     if request.user.is_authenticated:
@@ -178,8 +224,8 @@ def voteUp(request):
             # print("\n\nUser:", user.__dict__)
             slug = issues.slug
             # if num in [-1, 1] and list(issues) != []:
-            if user is not None:
-                issues.votes += 1
+            issues.votes += 1
+            if user is not None and author != "Anonymous":
                 userprofile.reputation += 1
             issues.save()
             user.save()
@@ -203,7 +249,7 @@ def voteDown(request):
             # print("\n\nUser:", user.__dict__)
             slug = issues.slug
             # if num in [-1, 1] and list(issues) != []:
-            if user is not None:
+            if user is not None and author != "Anonymous":
                 issues.votes -= 1
                 userprofile.reputation -= 1
             issues.save()
@@ -215,6 +261,14 @@ def voteDown(request):
         return redirect(f'/forum/post/{slug}')
     else:
         return redirect('/forum/login/')
+
+def tvoteUp(request):
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            postId = request.POST.get("postId")
+            author = request.POST.get("poster")
+            issues = Issue.objects.filter(id=postId).first()
+            user = User.objects.filter(username=author).first()
     
 def search(request):
     issues = list(Issue.objects.all())
@@ -243,4 +297,65 @@ def StudentLeaderBoard(request):
     params = {}
     params["page_title"] = "Student Leaderboard"
     params["users"] = users
-    return render(request, 'forum/leaderboard.html', params)
+    return render(request, 'forum/student/leaderboard.html', params)
+
+def TeacherLeaderBoard(request):
+    users = list(TeacherProfile.objects.all())
+    users.sort(key = lambda x: x.reputation, reverse=True)
+    params = {}
+    params["page_title"] = "Staff Leaderboard"
+    params["users"] = users
+    return render(request, 'forum/staff/leaderboard.html', params)
+
+# def getTags(request, param)
+
+def TagsProcessor(request, mode, args):
+
+    text = request.POST.get("tags")
+
+    taglist = list(set([slugify(x.strip(" ").lower()) for x in text.strip(" ").split(",")]))
+
+    tags_all = [x.label for x in Tags.objects.all()]
+
+    username = request.user.username
+
+    if mode == "post":
+        for i in taglist:
+            if i not in tags_all:
+                newtag = Tags(label=i, usernames=[], issues=[], comments=[])
+                newtag.save()
+
+        i = taglist[0]
+
+        for i in taglist:
+            a = Tags.objects.filter(label=i).first()
+            a.issues.append(args["slug"])
+            a.usernames.append(args["author"])
+            a.usernames = list(set(a.usernames))
+            a.issues = list(set(a.issues))            
+            a.save()
+    
+    elif mode == "comment":
+        for i in taglist:
+            if i not in tags_all:
+                newtag = Tags(label=i, usernames=[], issues=[], comments=[])
+                newtag.save()
+        
+        i = taglist[0]
+
+        for i in taglist:
+            a = Tags.objects.filter(label=i).first()
+            a.comments.append(args["slug"])
+            a.usernames.append(args["author"])
+            a.usernames = list(set(a.usernames))
+            a.comments = list(set(a.comments))
+            a.save()
+
+    return taglist
+
+def showTag(request, slug):
+    tags = Tags.objects.filter(label=slug).first()
+    if tags is not None: 
+        return HttpResponse(f"<h1>This is the tag page of {slug}</h1>")
+    else:
+        return HttpResponse(f"<h1>Tag {slug} doesn't exist!</h1>")

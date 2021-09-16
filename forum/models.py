@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class Issue(models.Model):
+    sno = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     subject = models.CharField(max_length=100, default="(Not available)")
     summary = models.TextField(max_length=200, default="(Not available)")
@@ -16,6 +17,7 @@ class Issue(models.Model):
     slug = models.SlugField(unique=True, max_length=100)
     votes = models.IntegerField(default=0)
     tvotes = models.IntegerField(default=0)
+    tags = models.JSONField(default=dict)
 
     def __str__(self):
         return self.subject
@@ -31,7 +33,7 @@ class Comment(models.Model):
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
     # parent = models.ForeignKey('self', on_delete=models.CASCADE, default=None)
     timestamp = models.DateTimeField(auto_now_add=True)
-    # votes = models.IntegerField(default=0)
+    votes = models.IntegerField(default=0)
     slug = models.SlugField(max_length=255, default='testing')
 
     def __str__(self):
@@ -54,4 +56,23 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.username
 
-# class TeacherProfile(models.Model):
+class TeacherProfile(models.Model):
+    sno = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    username = models.CharField(max_length=255, default='Anonymous')
+    reputation = models.IntegerField(default=0)
+    tags = models.JSONField(default=dict)
+    rollno = models.CharField(max_length=255, default="")
+
+    def __str__(self):
+        return self.username
+
+class Tags(models.Model):
+    sno = models.AutoField(primary_key=True)
+    label = models.CharField(max_length=100, default="Untagged", unique=True)
+    usernames = models.JSONField(default=list)
+    issues = models.JSONField(default=list)
+    comments = models.JSONField(default=list)
+
+    def __str__(self):
+        return self.label

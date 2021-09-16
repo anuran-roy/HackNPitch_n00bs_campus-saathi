@@ -33,4 +33,7 @@ urlpatterns = [
 
     # Search APIs
     path('search/', views.search, name="Search"),
+
+    # Tag APIs
+    path('tag/<str:slug>', views.showTag, name="ShowTag"),
 ]
