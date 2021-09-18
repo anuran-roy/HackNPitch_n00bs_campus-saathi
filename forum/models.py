@@ -45,7 +45,7 @@ class Comment(models.Model):
 class UserProfile(models.Model):
     sno = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    username = models.CharField(max_length=255, default='Anonymous')
+    username = models.CharField(max_length=255, unique=True)
     reputation = models.IntegerField(default=0)
     rollno = models.CharField(max_length=20, default='')
     facebook = models.CharField(max_length=150, default='#')
@@ -59,7 +59,7 @@ class UserProfile(models.Model):
 class TeacherProfile(models.Model):
     sno = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    username = models.CharField(max_length=255, default='Anonymous')
+    username = models.CharField(max_length=255, unique=True)
     reputation = models.IntegerField(default=0)
     tags = models.JSONField(default=dict)
     rollno = models.CharField(max_length=255, default="")

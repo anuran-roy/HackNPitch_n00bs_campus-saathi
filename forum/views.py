@@ -75,9 +75,9 @@ def newUser(request):
         email = request.POST.get('email')
         password = request.POST.get('passwd', None)
         cpassword = request.POST.get('cpasswd', None)
-        username = slugify(email[:email.find('@')].lower()+'-'+str(randint(1,1000000)))
+        username = email
         role = request.POST.get('role', 'student')
-        if cpassword == password:
+        if cpassword == password and User.objects.filter(username=username) is None:
             myuser = User.objects.create_user(username, email, password)
 
             # return HttpResponse("<h1>This is the redirect page.<h1>")
@@ -93,10 +93,15 @@ def newUser(request):
             elif role == 'teacher':
                 myprofile = TeacherProfile(reputation=0, empno = request.POST.get('rollno'), user=myuser, username=username, tags=[{"tags": []}])
             myprofile.save()
+
+            authenticate(username=username, password=password)
             # messages.success(request, "Your account has been successfully created!")
-            return HttpResponse(f"<h1>Your account has been successfully created! Your username is: {myuser.username}. Save it somewhere.</h1>")
-        else:
+            # return HttpResponse(f"<h1>Your account has been successfully created! Your username is: {myuser.username}. Save it somewhere.</h1>")
+            return redirect('/forum/dashboard')
+        elif cpassword != password:
             return HttpResponse("<h1>Error - Passwords don't match.</h1>")
+        elif User.objects.filter(username=username) is not None:
+            return redirect('/forum/login')
     else:
         return HttpResponse("<h1>HTTP 403 - Forbidden.</h1>")
 
