@@ -7,6 +7,7 @@ urlpatterns = [
     # path('admin/', admin.site.urls),
     path('', views.index),
     path('leaderboard/',views.StudentLeaderBoard, name="StudentLeaderBoard"),
+    path('top-professors/', views.TeacherLeaderBoard, name="TeacherLeaderBoard"),
 
     # Post related APIs
     path('post/<str:slug>', views.blogPost, name="PostView"),

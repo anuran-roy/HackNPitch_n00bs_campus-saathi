@@ -23,7 +23,7 @@ class Issue(models.Model):
         return self.subject
 
     class Meta:
-        ordering = ['-votes', '-date']
+        ordering = ['tvotes', '-votes', '-date']
 
 class Comment(models.Model):
     sno = models.AutoField(primary_key=True)

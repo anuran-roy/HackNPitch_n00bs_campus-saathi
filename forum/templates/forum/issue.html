@@ -14,7 +14,7 @@
         <a href="/forum/tag/{{i}}">{{i}}</a> 
     {% endfor %}
 </p>
-<p>Votes: {{votes}}</p>
+<h4>Votes: {{votes}}</h4>
 <article class="my-4 mx-4">
     <div class="container my-4 mx-4">
         {{ description }}
@@ -37,9 +37,9 @@
         <input type="submit" value="Dislike" class="btn btn-outline-primary">
     </form>
 </div>
-</center>
 
-<div class="row">Has the issue been considered?
+<h3>Has the issue been considered?</h3>
+<div class="row">
     <form method="POST" action="/forum/tvoteup/" class="my-2">
         {% csrf_token %}
         <input type="hidden" name="postTags" value="{{tags}}">        

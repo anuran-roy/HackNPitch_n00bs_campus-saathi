@@ -144,6 +144,18 @@ def userProfile(request, slug):
         user_issues = Issue.objects.filter(author=slug)
         params = dict(user.values()[0])
         params["user_issues"] = list(user_issues.values())
+
+        profileType = None
+
+        if UserProfile.objects.filter(username=slug).exists():
+            profileType = "Student"
+        elif TeacherProfile.objects.filter(username=slug).exists():
+            profileType = "Faculty"
+        else:
+            profileType = "Unknown"
+        
+        params["profileType"] = profileType
+        
         if list(user) == []:
             return HttpResponse("<h1>Username not found!</h1>")
         elif request.user.username == slug:
