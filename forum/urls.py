@@ -16,9 +16,11 @@ urlpatterns = [
     # Comment related APIs
     path('postcomment/', views.postComment, name="PostComment"),
 
-    #Voting related APIs
+    # Voting related APIs
     path('voteup/', views.voteUp, name="VoteUp"),
     path('votedown/', views.voteDown, name="VoteDown"),
+    path('tvoteup/', views.tvoteUp, name="TVoteUp"),
+    path('tvotedown/', views.tvoteDown, name="TVoteDown"),
 
     # Management related APIs
     path('login/', views.loggedin, name="Login"),

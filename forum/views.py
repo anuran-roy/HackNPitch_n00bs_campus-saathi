@@ -17,8 +17,7 @@ def index(request):
     else:
         return redirect('/forum/login')
 
-def search(request):
-    return HttpResponse("<h1>Search function invoked!</h1>")
+##################################################### For posts and comments #####################################################
 
 def blogPost(request, slug):
     issue = Issue.objects.filter(slug=slug)
@@ -77,31 +76,38 @@ def newUser(request):
         cpassword = request.POST.get('cpasswd', None)
         username = email
         role = request.POST.get('role', 'student')
-        if cpassword == password and User.objects.filter(username=username) is None:
-            myuser = User.objects.create_user(username, email, password)
+        print(f"\n\n\n\n{role}\n\n")
+        print(f"\n\n\n\n{User.objects.all()}\n\n")
+        try:    
+            if cpassword == password:
+                myuser = User.objects.create_user(username, email, password)
+                print(f"\n\n\n\n{myuser.__dict__}\n\n")
+                # return HttpResponse("<h1>This is the redirect page.<h1>")
+                myuser.first_name = request.POST.get('fname')
+                myuser.last_name = request.POST.get('lname')
+                myuser.middle_name = request.POST.get('mname', None)
+                # myuser.roll = request.POST.get('rollno')
+                # myuser.reputation = 0
+                myuser.save()
+                myprofile = None
+                if role == 'student':
+                    myprofile = UserProfile(reputation=0, rollno = request.POST.get('rollno'), user=myuser, username=username)
+                elif role == 'teacher':
+                    myprofile = TeacherProfile(reputation=0, rollno = request.POST.get('rollno'), user=myuser, username=username, tags=[{"tags": []}])
 
-            # return HttpResponse("<h1>This is the redirect page.<h1>")
-            myuser.first_name = request.POST.get('fname')
-            myuser.last_name = request.POST.get('lname')
-            myuser.middle_name = request.POST.get('mname', None)
-            # myuser.roll = request.POST.get('rollno')
-            # myuser.reputation = 0
-            myuser.save()
-            
-            if role == 'student':
-                myprofile = UserProfile(reputation=0, rollno = request.POST.get('rollno'), user=myuser, username=username)
-            elif role == 'teacher':
-                myprofile = TeacherProfile(reputation=0, empno = request.POST.get('rollno'), user=myuser, username=username, tags=[{"tags": []}])
-            myprofile.save()
+                print(f"\n\n\n\n{myprofile.__dict__}\n\n")
+                myprofile.save()
 
-            authenticate(username=username, password=password)
-            # messages.success(request, "Your account has been successfully created!")
-            # return HttpResponse(f"<h1>Your account has been successfully created! Your username is: {myuser.username}. Save it somewhere.</h1>")
-            return redirect('/forum/dashboard')
-        elif cpassword != password:
-            return HttpResponse("<h1>Error - Passwords don't match.</h1>")
-        elif User.objects.filter(username=username) is not None:
-            return redirect('/forum/login')
+                # authenticate(username=username, password=password)
+                # messages.success(request, "Your account has been successfully created!")
+                return HttpResponse(f"<h1>Your account has been successfully created! Your username is: {myuser.username}. Save it somewhere.</h1>")
+                # return redirect('/forum/dashboard')
+            elif cpassword != password:
+                return HttpResponse("<h1>Error - Passwords don't match.</h1>")
+            elif User.objects.filter(username=username) is not None:
+                return redirect('/forum/login')
+        except Exception as e:
+            return HttpResponse(f"<h1>An Error Occured. Error details: {e}</h1>")
     else:
         return HttpResponse("<h1>HTTP 403 - Forbidden.</h1>")
 
@@ -111,6 +117,9 @@ def uploadPost(request):
         subject = request.POST.get('subject')
         summary = request.POST.get('summary')
         description = request.POST.get('description')
+
+        if plino(description):
+            return HttpResponse("<h1>Really very very sorry fam,<br>your comment has been marked as spam.</h1>")
         image = request.FILES.get('myfile')
         is_anonymous = request.POST.get("anonymize", "off")
         # print(image)
@@ -181,9 +190,11 @@ def dashboard(request):
             
             params["notifications"] = ls
             myprof = TeacherProfile.objects.filter(username=username).first()
-            ls2 = [i.label for i in ls]
-            myprof.tags["tags"] = ls2
-            myprof.save()
+            ls2 = [x.label for x in ls]
+
+            if myprof is not None:
+                myprof.tags = ls2
+                myprof.save()
             
             print(f"\n\n\n{ls}\n\n\n")
 
@@ -216,15 +227,16 @@ def postComment(request):
         return HttpResponse("<h1>HTTP 403 - Forbidden</h1>")
     return redirect(f'/forum/post/{slug}')
 
+##################################################### For voting #####################################################
 
 def voteUp(request):
     if request.user.is_authenticated:
         if request.method == 'POST':
             postId = request.POST.get("postId")
             author = request.POST.get("poster")
-            issues = Issue.objects.filter(id=postId).first()
+            issues = Issue.objects.filter(sno=postId).first()
             user = User.objects.filter(username=author).first()
-            userprofile = UserProfile.objects.filter(username=author).first() if not (user.is_superuser or user.is_staff) else None
+            userprofile = list(set([TeacherProfile.objects.filter(username=author).first(), UserProfile.objects.filter(username=author).first()]))[0] if not (user.is_superuser or user.is_staff) else None
             # print("UserProfile:", userprofile.__dict__)
             # print("\n\nUser:", user.__dict__)
             slug = issues.slug
@@ -247,9 +259,9 @@ def voteDown(request):
         if request.method == 'POST':
             postId = request.POST.get("postId")
             author = request.POST.get("poster")
-            issues = Issue.objects.filter(id=postId).first()
+            issues = Issue.objects.filter(sno=postId).first()
             user = User.objects.filter(username=author).first()
-            userprofile = UserProfile.objects.filter(username=author).first() if not (user.is_superuser or user.is_staff) else None
+            userprofile = list(set([TeacherProfile.objects.filter(username=author).first(), UserProfile.objects.filter(username=author).first()]))[0] if not (user.is_superuser or user.is_staff) else None
             # print("UserProfile:", userprofile.__dict__)
             # print("\n\nUser:", user.__dict__)
             slug = issues.slug
@@ -270,11 +282,69 @@ def voteDown(request):
 def tvoteUp(request):
     if request.user.is_authenticated:
         if request.method == 'POST':
-            postId = request.POST.get("postId")
-            author = request.POST.get("poster")
-            issues = Issue.objects.filter(id=postId).first()
-            user = User.objects.filter(username=author).first()
-    
+            # postId = request.POST.get("postId")
+            tags = eval(request.POST.get("postTags"))
+            print(f"\n\n\n{tags}\t{type(tags)}\n\n\n")
+            # issues = Issue.objects.filter(id=postId).first()
+            # user = User.objects.filter(username=author).first()
+            usernames_list = []
+            # teachers_list = []
+            for tagname in tags:
+                print(f"\n{tagname}\n")
+                usernames_list += Tags.objects.filter(label=tagname).first().usernames
+            
+            usernames_list = list(set(usernames_list))
+            print(f"\n{usernames_list}\n")
+
+            for i in usernames_list:
+                print(f"\n{i}\n")
+                teacheruser = TeacherProfile.objects.filter(username=i).first()
+                print(f"\n{teacheruser}\n")
+                if teacheruser is not None:
+                    teacheruser.reputation += 1
+                    teacheruser.save()
+
+            return HttpResponse("Don't you think the authorities are awesome? :D")
+        else:
+            return HttpResponse('"There are no shortcuts to votes :)" ~ Developers')
+    else:
+        return redirect('/forum/login')
+
+def tvoteDown(request):
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            # postId = request.POST.get("postId")
+            tags = eval(request.POST.get("postTags"))
+            print(f"\n\n\n{tags}\t{type(tags)}\n\n\n")
+            # issues = Issue.objects.filter(id=postId).first()
+            # user = User.objects.filter(username=author).first()
+            usernames_list = []
+            # teachers_list = []
+            for tagname in tags:
+                print(f"\n{tagname}\n")
+                usernames_list += Tags.objects.filter(label=tagname).first().usernames
+            
+            usernames_list = list(set(usernames_list))
+            print(f"\n{usernames_list}\n")
+
+            for i in usernames_list:
+                print(f"\n{i}\n")
+                teacheruser = TeacherProfile.objects.filter(username=i).first()
+                print(f"\n{teacheruser}\n")
+                if teacheruser is not None:
+                    teacheruser.reputation -= 1
+                    teacheruser.save()
+
+            return HttpResponse("So sorry to know that :(... Maybe they'll look into it now?")
+        else:
+            return HttpResponse('"There are no shortcuts to votes :)" ~ Developers')
+    else:
+        return redirect('/forum/login')
+
+##################################################### End voting #####################################################
+
+##################################################### For search and leaderboards #####################################################
+
 def search(request):
     issues = list(Issue.objects.all())
     query = request.POST.get('search')
@@ -312,7 +382,9 @@ def TeacherLeaderBoard(request):
     params["users"] = users
     return render(request, 'forum/staff/leaderboard.html', params)
 
-# def getTags(request, param)
+##################################################### End search and leaderboards #####################################################
+
+##################################################### For tags #####################################################
 
 def TagsProcessor(request, mode, args):
 
@@ -365,3 +437,5 @@ def showTag(request, slug):
         return render(request, 'forum/tag.html', tags.__dict__)
     else:
         return HttpResponse(f"<h1>Tag {slug} doesn't exist!</h1>")
+
+##################################################### End tags #####################################################

@@ -169,7 +169,7 @@
           <div class="card card3">
             <h2>Tags</h2>
             <ul>
-              {% for key,value in tags.items %}
+              {% comment %} {% for key,value in tags.items %}
                 <li class="car1_text">{{key}}
                   <ol>
                   {% for j in value %}
@@ -177,6 +177,9 @@
                   {% endfor %}
                   </ol>
                 </li>
+              {% endfor %} {% endcomment %}
+              {% for key in tags %}
+              <li class="car1_text">{{key}}</li>
               {% endfor %}
             </ul>
           </div>
@@ -194,6 +197,7 @@
                     <th onclick="sortTable(0,'NotificationsTable')">Tag</th>
                     <th onclick="sortTable(1,'NotificationsTable')">Issues</th>
                     <th onclick="sortTable(2,'NotificationsTable')">Comments</th>
+                    <th onclick="sortTable(3,'NotificationsTable')">Details</th>
                     {% comment %} <th onclick="sortTable(3,'NotificationsTable')">Tag</th>
                     <th onclick="sortTable(4,'NotificationsTable')">Link</th> {% endcomment %}
                   </tr>
@@ -205,6 +209,7 @@
                       <td>{{ i.label }}</td>
                       <td>{{ i.issues|length }}</td>
                       <td>{{ i.comments|length }}</td>
+                      <td><a href="/forum/tag/{{ i }}" target="_blank"><button class="btn btn-primary">Go</button></a></td>
                       {% comment %} <td>{{ i.tracked|yesno:"Yes,No" }}</td>
                       <td>
                         <a href="/forum/post/{{ i.slug }}" target="_blank"><button class="btn btn-primary">Go</button></a>

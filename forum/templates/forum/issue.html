@@ -25,16 +25,31 @@
 <div class="row">
     <form method="POST" action="/forum/voteup/" class="my-2">
         {% csrf_token %}
-        <input type="hidden" name="postId" value="{{id}}">
+        <input type="hidden" name="postId" value="{{sno}}">
         <input type="hidden" name="poster" value="{{author}}">
         <input type="submit" value="Like" class="btn btn-outline-primary">
     </form>
     <!-- <br><br> -->
     <form method="POST" action="/forum/votedown/" class="my-2">
         {% csrf_token %}
-        <input type="hidden" name="postId" value="{{id}}">        
+        <input type="hidden" name="postId" value="{{sno}}">        
         <input type="hidden" name="poster" value="{{author}}">
         <input type="submit" value="Dislike" class="btn btn-outline-primary">
+    </form>
+</div>
+</center>
+
+<div class="row">Has the issue been considered?
+    <form method="POST" action="/forum/tvoteup/" class="my-2">
+        {% csrf_token %}
+        <input type="hidden" name="postTags" value="{{tags}}">        
+        <input type="submit" value="Yes" class="btn btn-outline-primary">
+    </form>
+    <!-- <br><br> -->
+    <form method="POST" action="/forum/tvotedown/" class="my-2">
+        {% csrf_token %}
+        <input type="hidden" name="postTags" value="{{tags}}">        
+        <input type="submit" value="No" class="btn btn-outline-primary">
     </form>
 </div>
 </center>

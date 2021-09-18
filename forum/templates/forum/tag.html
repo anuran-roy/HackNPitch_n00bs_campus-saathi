@@ -5,7 +5,7 @@
 {% block body %}
 
 <div class="container">
-    <h1 class="my-4 mx-4">Tag: {{label}} </h1>
+    <h1 class="my-4 mx-4">Tag: <b>{{label}}</b> </h1>
     {% comment %} <p>
         Name: {{first_name}} {{last_name}}
     </p>
@@ -28,7 +28,7 @@
             <a style="text-decoration: none;" href="{{i.linkedin}}" name="LinkedIn">LinkedIn</a>
         </p>
     </p> {% endcomment %}
-    <h2 class="my-4 mx-4">Issues with tag {{label}}:</h2><br>
+    <h2 class="my-4 mx-4">Issues with tag <b>{{label}}</b>:</h2><br>
     <table style="width:100%">
         <tr>
             <th>Issue</th>
@@ -41,7 +41,7 @@
             </tr>
         {% endfor %}
       </table>
-      <h2 class="my-4 mx-4">Comments with tag {{label}}:</h2><br>
+      <h2 class="my-4 mx-4">Comments with tag <b>{{label}}</b>:</h2><br>
         <table style="width:100%">
             <tr>
                 <th>Issue</th>
@@ -54,7 +54,7 @@
                 </tr>
             {% endfor %}
         </table>
-        <h2 class="my-4 mx-4">Usernames using tag {{label}}:</h2><br>
+        <h2 class="my-4 mx-4">Usernames using tag <b>{{label}}</b>:</h2><br>
         <table style="width:100%">
             <tr>
                 <th>Username</th>
