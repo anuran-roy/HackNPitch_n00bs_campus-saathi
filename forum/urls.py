@@ -13,6 +13,7 @@ urlpatterns = [
     path('post/<str:slug>', views.blogPost, name="PostView"),
     path('newpost/', views.newPost, name="NewPost"),
     path('uploadpost/', views.uploadPost, name="UploadPost"),
+    path('deletepost/<str:slug>', views.deletePost, name="Deletepost"),
 
     # Comment related APIs
     path('postcomment/', views.postComment, name="PostComment"),

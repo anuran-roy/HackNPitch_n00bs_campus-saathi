@@ -19,7 +19,13 @@
       <!-- Sidebar -->
       <div id="sidebar-wrapper">
         <div class="avatar">
-          <a href="#" data-toggle="tooltip" data-placement="right" title="Username: {{ username }}, Name: {{ first_name }} {{ last_name }}"><i class="fas fa-user"></i></a>
+          <a href="#" data-toggle="tooltip" data-placement="right" title="Username: {{ username }}, Name: {{ first_name }} {{ last_name }}">
+            {% if profilepic == '' %}
+              <i class="fas fa-user"></i>
+            {% else %}
+              <img src="media/{{ profilepic}}" style="border-radius: 50%;"></img>
+            {% endif %}
+          </a>
         </div>
         <ul>
         
@@ -90,6 +96,13 @@
                       <td>{{ i.tracked|yesno:"Yes,No" }}</td>
                       <td>
                         <a href="/forum/post/{{ i.slug }}" target="_blank"><button class="btn btn-primary">Go</button></a>
+                        <br><br>
+                        <form method="POST" action="/forum/deletepost/comment" class="my-2">
+                          {% csrf_token %}
+                          <input type="hidden" name="postId" value="{{i.sno}}">        
+                          <input type="hidden" name="poster" value="{{i.username}}"> 
+                          <input type="submit" value="Delete" class="btn btn-primary">
+                        </form>
                       </td>
                     </tr>
                   {% endfor %}
@@ -155,7 +168,15 @@
                     <tr>
                       <td>{{i.description|truncatechars:50}}</td>
                       <td>{{i.timestamp}}</td>
-                      <td><a href="/forum/post/{{i.slug}}" target="_blank"><button class="btn btn-primary">Go</button></a>
+                      <td>
+                        <a href="/forum/post/{{i.slug}}" target="_blank"><button class="btn btn-primary">Go</button></a>
+                        <br><br>
+                        <form method="POST" action="/forum/deletepost/comment" class="my-2">
+                          {% csrf_token %}
+                          <input type="hidden" name="postId" value="{{i.sno}}">        
+                          <input type="hidden" name="poster" value="{{i.username}}"> 
+                          <input type="submit" value="Delete" class="btn btn-primary">
+                        </form>
                       </td>
                     </tr>
                   {% endfor %}
@@ -209,7 +230,9 @@
                       <td>{{ i.label }}</td>
                       <td>{{ i.issues|length }}</td>
                       <td>{{ i.comments|length }}</td>
-                      <td><a href="/forum/tag/{{ i }}" target="_blank"><button class="btn btn-primary">Go</button></a></td>
+                      <td>
+                      <a href="/forum/tag/{{ i }}" target="_blank"><button class="btn btn-primary">Go</button></a>
+                      </td>
                       {% comment %} <td>{{ i.tracked|yesno:"Yes,No" }}</td>
                       <td>
                         <a href="/forum/post/{{ i.slug }}" target="_blank"><button class="btn btn-primary">Go</button></a>

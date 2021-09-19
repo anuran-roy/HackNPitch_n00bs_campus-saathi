@@ -6,7 +6,7 @@
     Signup for Campus Saathi Forum.
 </p>
 
-<form class="my-5 mx-5" action='/forum/newuser/' method='POST'>
+<form class="my-5 mx-5" action='/forum/newuser/' method='POST' enctype="multipart/form-data">
     {% csrf_token %}
     <div class="row my-4">
         <div class="col">
@@ -34,6 +34,10 @@
     <div class="mb-3">
       <!-- <label for="exampleInputPassword1" class="form-label">Password</label> -->
       <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Confirm Password*" name="cpasswd" required>
+    </div>
+    <div class="my-5 mx-5">
+      Upload your profile picture:
+      <input type="file" id="profilepic" name="profilepic">
     </div>
     <div class="my-4 mx-4">
         You're a :

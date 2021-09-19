@@ -18,8 +18,14 @@
     <div id="wrapper">
       <!-- Sidebar -->
       <div id="sidebar-wrapper">
-        <div class="avatar">
-          <a href="#" data-toggle="tooltip" data-placement="right" title="Username: {{ username }}, Name: {{ first_name }} {{ last_name }}"><i class="fas fa-user"></i></a>
+        <div class="avatar" style="margin: 0px;">
+          <a href="#" data-toggle="tooltip" data-placement="right" title="Username: {{ username }}, Name: {{ first_name }} {{ last_name }}">
+            {% if profilepic == '' %}
+              <i class="fas fa-user"></i>
+            {% else %}
+              <img src="/media/{{ profilepic }}" style="border-radius: 100%; height: 40px; width: 40px; padding: 0px;"></img>
+            {% endif %}
+          </a>
         </div>
         <ul>
         
@@ -90,6 +96,13 @@
                       <td>{{ i.tracked|yesno:"Yes,No" }}</td>
                       <td>
                         <a href="/forum/post/{{ i.slug }}" target="_blank"><button class="btn btn-primary">Go</button></a>
+                        <br><br>
+                        <form method="POST" action="/forum/deletepost/post" class="my-2">
+                          {% csrf_token %}
+                          <input type="hidden" name="postId" value="{{i.sno}}">        
+                          <input type="hidden" name="poster" value="{{i.username}}"> 
+                          <input type="submit" value="Delete" class="btn btn-primary">
+                      </form>
                       </td>
                     </tr>
                   {% endfor %}
@@ -155,7 +168,16 @@
                     <tr>
                       <td>{{i.description|truncatechars:50}}</td>
                       <td>{{i.timestamp}}</td>
-                      <td><a href="/forum/post/{{i.slug}}" target="_blank"><button class="btn btn-primary">Go</button></a>
+                      <td>
+                      <a href="/forum/post/{{i.slug}}" target="_blank"><button class="btn btn-primary">Go</button>
+                      <br><br>
+                      <form method="POST" action="/forum/deletepost/comment" class="my-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="postId" value="{{i.sno}}">        
+                        <input type="hidden" name="poster" value="{{i.username}}"> 
+                        <input type="submit" value="Delete" class="btn btn-primary">
+                      </form>
+                      </a>
                       </td>
                     </tr>
                   {% endfor %}

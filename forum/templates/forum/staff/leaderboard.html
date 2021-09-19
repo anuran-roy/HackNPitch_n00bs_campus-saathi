@@ -28,7 +28,7 @@
       <div class="card my-4 mx-4">
         {% comment %} <img src="/media/{{ i.image }}" class="card-img-top img-fluid" alt="..." style="aspect-ratio: 3/2;"> {% endcomment %}
             <div class="card-body">
-              <h5 class="card-title mx-1">{{ i.reputation }}</h5>
+              <h3 class="card-title mx-1">Reputation: {{ i.reputation }}</h3>
               <p class="card-text mx-1">{{ i.username|truncatechars:75 }}</p>
               {% comment %} <p class="card-text mx-1">Posted on: {{ i.date }} by {{ i.author }}</p>
               <p class="card-text row mx-1">

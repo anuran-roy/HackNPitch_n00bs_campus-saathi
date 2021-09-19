@@ -35,6 +35,7 @@ class Comment(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     votes = models.IntegerField(default=0)
     slug = models.SlugField(max_length=255, default='testing')
+    tags = models.JSONField(default=list)
 
     def __str__(self):
         return self.description[:50] + '...'
@@ -52,6 +53,7 @@ class UserProfile(models.Model):
     twitter = models.CharField(max_length=150, default='#')
     instagram = models.CharField(max_length=150, default='#')
     linkedin = models.CharField(max_length=150, default='#')
+    profilepic = models.ImageField(upload_to='forum/images/', blank=True)
 
     def __str__(self):
         return self.username
@@ -63,6 +65,7 @@ class TeacherProfile(models.Model):
     reputation = models.IntegerField(default=0)
     tags = models.JSONField(default=dict)
     rollno = models.CharField(max_length=255, default="")
+    profilepic = models.ImageField(upload_to='forum/images/', blank=True)
 
     def __str__(self):
         return self.username

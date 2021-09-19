@@ -7,8 +7,12 @@ from django.template.defaultfilters import slugify
 from random import randint
 from datetime import datetime
 from .spamfilter import plino
+from django.core.mail import send_mail
 
 # Create your views here.
+
+##################################################### For index and error pages #####################################################
+
 def index(request):
     if request.user.is_authenticated:
         params = {'issues': Issue.objects.all()}
@@ -17,24 +21,21 @@ def index(request):
     else:
         return redirect('/forum/login')
 
-##################################################### For posts and comments #####################################################
 
-def blogPost(request, slug):
-    issue = Issue.objects.filter(slug=slug)
-    comments = Comment.objects.filter(issue=issue.first())
-    if list(issue) == []:
-        return HttpResponse("<h1>404 - Post not available!</h1>")
-    else:
-        params = dict(issue.values()[0])
-        print(f"\n\n\n{params}\n\n\n")
-        params["comments"] = comments
-        return render(request, 'forum/issue.html', params)
+def errorPage(request, args={}):
+    return render(request, 'forum/error.html', args)
+
+##################################################### End index and error pages #####################################################
+
+##################################################### For User authentication and related activities #####################################################
+
 
 def signup(request):
     if request.user.is_authenticated:
         return redirect('/forum/')
     else:
         return render(request, 'forum/signup.html')
+        
 
 def loggedin(request):
     if request.user.is_authenticated:
@@ -42,11 +43,6 @@ def loggedin(request):
     else:
         return render(request, 'forum/login.html')
 
-def newPost(request):
-    if not request.user.is_authenticated:
-        return redirect('/forum/login/')
-    else:
-        return render(request, 'forum/post.html')
 
 def loginUser(request):
     if request.method == 'POST':    
@@ -63,11 +59,13 @@ def loginUser(request):
     else:
         return HttpResponse("<h1>HTTP 403 - Forbidden.</h1>")
 
+
 def logoutUser(request):
     # if request.method == 'POST':
     logout(request)
     # return HttpResponse("<h1>You've been successfully logged out.</h1>")
     return redirect('/forum/')
+
 
 def newUser(request):
     if request.method == 'POST':    
@@ -76,6 +74,9 @@ def newUser(request):
         cpassword = request.POST.get('cpasswd', None)
         username = email
         role = request.POST.get('role', 'student')
+
+        image = request.FILES.get('profilepic')
+
         print(f"\n\n\n\n{role}\n\n")
         print(f"\n\n\n\n{User.objects.all()}\n\n")
         try:    
@@ -91,9 +92,9 @@ def newUser(request):
                 myuser.save()
                 myprofile = None
                 if role == 'student':
-                    myprofile = UserProfile(reputation=0, rollno = request.POST.get('rollno'), user=myuser, username=username)
+                    myprofile = UserProfile(reputation=0, rollno = request.POST.get('rollno'), user=myuser, username=username, profilepic=image)
                 elif role == 'teacher':
-                    myprofile = TeacherProfile(reputation=0, rollno = request.POST.get('rollno'), user=myuser, username=username, tags=[{"tags": []}])
+                    myprofile = TeacherProfile(reputation=0, rollno = request.POST.get('rollno'), user=myuser, username=username, tags=[{"tags": []}], profilepic=image)
 
                 print(f"\n\n\n\n{myprofile.__dict__}\n\n")
                 myprofile.save()
@@ -111,6 +112,39 @@ def newUser(request):
     else:
         return HttpResponse("<h1>HTTP 403 - Forbidden.</h1>")
 
+
+def passwordReset(request):
+    return HttpResponse("<h1>Password Reset</h1>")
+
+# def sendMessage(message, args={}):
+
+
+# def verifyCode(request, slug):
+#     num = 
+
+##################################################### End User authentication and related activities #####################################################
+
+##################################################### For User Activities #####################################################
+
+def blogPost(request, slug):
+    issue = Issue.objects.filter(slug=slug)
+    comments = Comment.objects.filter(issue=issue.first())
+    if list(issue) == []:
+        return HttpResponse("<h1>404 - Post not available!</h1>")
+    else:
+        params = dict(issue.values()[0])
+        print(f"\n\n\n{params}\n\n\n")
+        params["comments"] = comments
+        return render(request, 'forum/issue.html', params)
+
+
+def newPost(request):
+    if not request.user.is_authenticated:
+        return redirect('/forum/login/')
+    else:
+        return render(request, 'forum/post.html')
+
+
 def uploadPost(request):
     if request.method == "POST":
         user = request.user
@@ -118,8 +152,8 @@ def uploadPost(request):
         summary = request.POST.get('summary')
         description = request.POST.get('description')
 
-        if plino(description):
-            return HttpResponse("<h1>Really very very sorry fam,<br>your comment has been marked as spam.</h1>")
+        # if plino(description):
+        #     return HttpResponse("<h1>Really very very sorry fam,<br>your comment has been marked as spam.</h1>")
         image = request.FILES.get('myfile')
         is_anonymous = request.POST.get("anonymize", "off")
         # print(image)
@@ -138,24 +172,31 @@ def uploadPost(request):
     else:
         return HttpResponse("<h1>HTTP 403 - Forbidden.</h1>")
 
+
 def userProfile(request, slug):
     try:
         user = User.objects.filter(username=slug)
         user_issues = Issue.objects.filter(author=slug)
+
         params = dict(user.values()[0])
         params["user_issues"] = list(user_issues.values())
+        params["comments"] = list(Comment.objects.filter(username=slug).values())
 
         profileType = None
+        profilepic = ''
 
         if UserProfile.objects.filter(username=slug).exists():
             profileType = "Student"
+            profilepic = UserProfile.objects.filter(username=slug).first().profilepic
         elif TeacherProfile.objects.filter(username=slug).exists():
             profileType = "Faculty"
+            profilepic = TeacherProfile.objects.filter(username=slug).first().profilepic
         else:
             profileType = "Unknown"
         
         params["profileType"] = profileType
-        
+        params["profilepic"] = profilepic
+
         if list(user) == []:
             return HttpResponse("<h1>Username not found!</h1>")
         elif request.user.username == slug:
@@ -164,6 +205,7 @@ def userProfile(request, slug):
             return render(request, 'forum/user.html', params)
     except IndexError:
         return HttpResponse("<h1>Username not found!</h1>")
+
 
 def dashboard(request):
     if request.user.is_authenticated:
@@ -183,7 +225,7 @@ def dashboard(request):
         params["activity"] = activity
         params["rollno"] = profile.__dict__["rollno"] if not request.user.is_superuser else "NA"
         params["reputation"] = profile.__dict__["reputation"] if not request.user.is_superuser else "Inf"
-
+        params["profilepic"] = profile.__dict__["profilepic"] if not request.user.is_superuser else ''
         if isTeacher:
             params["tags"] = profile.__dict__["tags"]
 
@@ -231,13 +273,39 @@ def postComment(request):
 
         # comment_slug = issue_slug + '-' + datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
         if not plino(comment):
-            obj = Comment(description=comment, issue=issues, user=user, username=username, slug=slug)
+            obj = Comment(description=comment, issue=issues, user=user, username=username, slug=slug, tags=tags)
             obj.save()
+            return redirect(f'/forum/post/{slug}')
         else:
             return HttpResponse("<h1>Really very very sorry fam,<br>your comment has been marked as spam.</h1>")
     else:
-        return HttpResponse("<h1>HTTP 403 - Forbidden</h1>")
-    return redirect(f'/forum/post/{slug}')
+        # return HttpResponse("<h1>HTTP 403 - Forbidden</h1>")
+        return errorPage(request)
+
+
+def deletePost(request, slug):
+    if request.method == "POST":
+        postId = request.POST.get("postId")
+        author = request.POST.get("poster")
+        postSlug = None
+        a = None
+        if slug == "issue":
+            a = Issue.objects.filter(sno=postId).first()
+        elif slug == "comment":
+            a = Comment.objects.filter(sno=postId).first()
+            postSlug = str(a.slug)
+        if request.user.username == author or request.user.is_superuser:
+            a.delete()
+            if slug == "issue":
+                return redirect("/forum/")
+            elif slug == "comment":
+                return redirect(f"/forum/post/{postSlug}")
+        else:
+            return HttpResponse("<h1>Hippity hoppity floppity, the post isn't your property :P")
+    else:
+        return HttpResponse("<h1>Error 403- Forbidden")
+
+##################################################### End User Activities #####################################################
 
 ##################################################### For voting #####################################################
 
@@ -266,6 +334,7 @@ def voteUp(request):
     else:
         return redirect('/forum/login/')
 
+
 def voteDown(request):
     if request.user.is_authenticated:
         if request.method == 'POST':
@@ -290,6 +359,7 @@ def voteDown(request):
         return redirect(f'/forum/post/{slug}')
     else:
         return redirect('/forum/login/')
+
 
 def tvoteUp(request):
     if request.user.is_authenticated:
@@ -322,6 +392,7 @@ def tvoteUp(request):
     else:
         return redirect('/forum/login')
 
+
 def tvoteDown(request):
     if request.user.is_authenticated:
         if request.method == 'POST':
@@ -353,6 +424,7 @@ def tvoteDown(request):
     else:
         return redirect('/forum/login')
 
+
 ##################################################### End voting #####################################################
 
 ##################################################### For search and leaderboards #####################################################
@@ -378,6 +450,7 @@ def search(request):
     params["page_title"] = f"Showing {len(results_list)} search results for '{query}' in {(datetime.now() - init).total_seconds()} seconds"
     return render(request, 'forum/index.html', params)
 
+
 def StudentLeaderBoard(request):
     users = list(UserProfile.objects.all())
     users.sort(key = lambda x: x.reputation, reverse=True)
@@ -386,6 +459,7 @@ def StudentLeaderBoard(request):
     params["users"] = users
     return render(request, 'forum/student/leaderboard.html', params)
 
+
 def TeacherLeaderBoard(request):
     users = list(TeacherProfile.objects.all())
     users.sort(key = lambda x: x.reputation, reverse=True)
@@ -393,6 +467,7 @@ def TeacherLeaderBoard(request):
     params["page_title"] = "Staff Leaderboard"
     params["users"] = users
     return render(request, 'forum/staff/leaderboard.html', params)
+
 
 ##################################################### End search and leaderboards #####################################################
 
@@ -442,6 +517,7 @@ def TagsProcessor(request, mode, args):
 
     return taglist
 
+
 def showTag(request, slug):
     tags = Tags.objects.filter(label=slug).first()
     if tags is not None: 
@@ -449,5 +525,6 @@ def showTag(request, slug):
         return render(request, 'forum/tag.html', tags.__dict__)
     else:
         return HttpResponse(f"<h1>Tag {slug} doesn't exist!</h1>")
+
 
 ##################################################### End tags #####################################################

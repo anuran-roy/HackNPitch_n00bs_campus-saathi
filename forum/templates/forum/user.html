@@ -4,23 +4,18 @@
 
 {% block body %}
 
-<div class="container">
-    <h1 class="my-4 mx-4">User profile: {{username}} </h1>
-    <p>
+<h1 class="my-4 mx-4">User profile: {{username}} </h1>
+<div class="row mx-4">
+    <img src="/media/{{profilepic}}" style="height: 200px; width: 300px; margin-right: 30px; border-radius: 15%;">
+    <div class="col-md-6">
         Name: {{first_name}} {{last_name}}<br>
-        Role: {{profileType}}
-    </p>
-    <p>
-        Username: {{ username }}
-    </p>
-    <p>
+        Role: {{profileType}}<br>
+        Username: {{ username }}<br>
         Joined on: {{ date_joined }} UTC<br>
-        Last login: {{ last_login }} UTC
-    </p>
-    <p>
-        Email: {{email}}
-    </p>
-    <p>
+        Last login: {{ last_login }} UTC<br>
+        Email: {{email}}<br>
+    </div>
+    <div class="col-md-3">
         <h3 class="my-4 mx-4">Social:</h3>
         <p class="my-4 mx-4 row">
             <a style="text-decoration: none;" href="{{i.facebook}}" name="Facebook">Facebook</a>
@@ -28,7 +23,10 @@
             <a style="text-decoration: none;" href="{{i.linkedin}}" name="Instagram">Instagram</a>
             <a style="text-decoration: none;" href="{{i.linkedin}}" name="LinkedIn">LinkedIn</a>
         </p>
-    </p>
+    </div>
+</div>
+<div class="row mx-4">
+<div class="container">
     <h2 class="my-4 mx-4">Issues posted by {{username}}:</h2><br>
     <table style="width:100%">
         <tr>
@@ -45,7 +43,25 @@
                 <td><a href="/forum/post/{{ i.slug }}" target="+_blank">View</td>
             </tr>
         {% endfor %}
-      </table>
+    </table>
+    <h2 class="my-4 mx-4">Comments by {{username}}:</h2><br>
+    <table style="width:100%">
+        <tr>
+            <th>Issue</th>
+            <th>Date</th>
+            <th>Tracked</th>
+            <th>Link</th>
+        </tr>
+        {% for i in comments %}
+            <tr>
+                <td>{{ i.slug }}</td>
+                <td>{{ i.timestamp }}</td>
+                <td>{{ i.description|truncatechars:30 }}</td>
+                <td><a href="/forum/post/{{ i.slug }}" target="+_blank">View</td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
 </div>
 
 {% endblock %}

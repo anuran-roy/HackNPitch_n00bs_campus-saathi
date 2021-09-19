@@ -38,6 +38,14 @@
     </form>
 </div>
 
+<div class="row">
+    <form method="POST" action="/forum/deletepost/issue" class="my-2">
+        {% csrf_token %}
+        <input type="hidden" name="postId" value="{{sno}}">        
+        <input type="hidden" name="poster" value="{{author}}">
+        <input type="submit" value="Delete" class="btn btn-outline-primary">
+    </form>
+</div>
 <h3>Has the issue been considered?</h3>
 <div class="row">
     <form method="POST" action="/forum/tvoteup/" class="my-2">
@@ -85,8 +93,15 @@
                 Image here
             </div>
             <div class="col-md-10">
+                <p>Time: {{i.timestamp}} </p>
                 <b><a href="/forum/user/{{i.user}}" style="text-decoration: none;">{{i.user}}</a></b> says:
                 <p class="my-2 mx-2">{{i.description}}</p>
+                <form method="POST" action="/forum/deletepost/comment" class="my-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="postId" value="{{i.sno}}">        
+                    <input type="hidden" name="poster" value="{{i.username}}"> 
+                    <input type="submit" value="Delete" class="btn btn-outline-primary">
+                </form>
             </div>
     </div>
     {% endfor %}
