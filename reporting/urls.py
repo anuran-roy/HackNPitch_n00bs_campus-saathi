@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from . import views
 
 admin.site.site_header = "Campus Saathi Admin Panel"
 admin.site.site_title = "Campus Saathi Admin Panel"
@@ -24,7 +25,12 @@ admin.site.index_title = "Welcome to the Campus Saathi Admin Panel"
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
     path('', include('home.urls')),
+    
     path('forum/', include('forum.urls')),
+
+    # Error Page
+    path('<str:id>/', views.errorPage, name="ErrorPage"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -40,7 +40,7 @@ def index(request):
         return redirect('/forum/login')
 
 
-def errorPage(request, args={}):
+def errorPage(request, args=messages["404"], **kwargs):
     return render(request, 'forum/errorpage.html', args)
 
 ##################################################### End index and error pages #####################################################
@@ -163,17 +163,19 @@ def passwordReset(request):
 ##################################################### For User Activities #####################################################
 
 def blogPost(request, slug):
-    issue = Issue.objects.filter(slug=slug)
-    comments = Comment.objects.filter(issue=issue.first())
-    if list(issue) == []:
-        # return HttpResponse("<h1>404 - Post not available!</h1>")
-        return errorPage(request, message["404"])
-    else:
-        params = dict(issue.values()[0])
-        print(f"\n\n\n{params}\n\n\n")
-        params["comments"] = comments
-        return render(request, 'forum/issue.html', params)
-
+    try:
+        issue = Issue.objects.filter(slug=slug)
+        comments = Comment.objects.filter(issue=issue.first())
+        if list(issue) == []:
+            # return HttpResponse("<h1>404 - Post not available!</h1>")
+            return errorPage(request, message["404"])
+        else:
+            params = dict(issue.values()[0])
+            print(f"\n\n\n{params}\n\n\n")
+            params["comments"] = comments
+            return render(request, 'forum/issue.html', params)
+    except Exception as e:
+        return errorPage(request, messages["404"])
 
 def newPost(request):
     if not request.user.is_authenticated:
@@ -326,9 +328,8 @@ def postComment(request):
             obj.save()
             return redirect(f'/forum/post/{slug}')
         else:
-            return HttpResponse("<h1>Really very very sorry fam,<br>your comment has been marked as spam.</h1>")
             msg = {
-                    "code": 404,
+                    "code": "Spam",
                     "status": "Spam detected",
                     "message": "Really very very sorry fam,<br>your comment has been marked as spam."
                 }
@@ -611,7 +612,10 @@ def showTag(request, slug):
         # return HttpResponse(f"<h1>This is the tag page of {slug}</h1>")
         return render(request, 'forum/tag.html', tags.__dict__)
     else:
-        return HttpResponse(f"<h1>Tag {slug} doesn't exist!</h1>")
+        msg = dict(messages["404"])
+        msg["status"] = "That's the wrong way."
+        msg["message"] = f"Tag '{slug}' doesn't exist. It may have been deleted, or might have never existed."
+        return errorPage(request, msg)
         
 
 
