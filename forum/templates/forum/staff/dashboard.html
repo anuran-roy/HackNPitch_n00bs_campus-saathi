@@ -169,7 +169,7 @@
                       <td>{{i.description|truncatechars:50}}</td>
                       <td>{{i.timestamp}}</td>
                       <td>
-                        <a href="/forum/post/{{i.slug}}" target="_blank"><button class="btn btn-primary">Go</button></a>
+                        <a href="/forum/post/{{i.slug}}" target="_blank"><button class="btn btn-primary">Go</button>
                         <br><br>
                         <form method="POST" action="/forum/deletepost/comment" class="my-2">
                           {% csrf_token %}

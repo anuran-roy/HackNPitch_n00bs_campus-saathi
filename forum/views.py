@@ -9,6 +9,24 @@ from datetime import datetime
 from .spamfilter import plino
 from django.core.mail import send_mail
 
+messages = {
+    "404": {
+        "code": 404,
+        "status": "Page not found",
+        "message": "Oops! The page you are looking for does not exist. It might have been moved or deleted."
+    },
+    "403": {
+        "code": 403,
+        "status": "Forbidden",
+        "message": '"Tresspassers will be prosecuted." ~ Developers'
+    },
+    "500": {
+        "code": 500,
+        "status": "Server Error",
+        "message": ""
+    },
+}
+
 # Create your views here.
 
 ##################################################### For index and error pages #####################################################
@@ -23,7 +41,7 @@ def index(request):
 
 
 def errorPage(request, args={}):
-    return render(request, 'forum/error.html', args)
+    return render(request, 'forum/errorpage.html', args)
 
 ##################################################### End index and error pages #####################################################
 
@@ -57,7 +75,7 @@ def loginUser(request):
         else:
             return HttpResponse("<h1>Credentials don't match.</h1>")
     else:
-        return HttpResponse("<h1>HTTP 403 - Forbidden.</h1>")
+        return errorPage(request, messages["403"])
 
 
 def logoutUser(request):
@@ -110,7 +128,7 @@ def newUser(request):
         except Exception as e:
             return HttpResponse(f"<h1>An Error Occured. Error details: {e}</h1>")
     else:
-        return HttpResponse("<h1>HTTP 403 - Forbidden.</h1>")
+        return errorPage(request, messages["403"])
 
 
 def passwordReset(request):
@@ -130,7 +148,8 @@ def blogPost(request, slug):
     issue = Issue.objects.filter(slug=slug)
     comments = Comment.objects.filter(issue=issue.first())
     if list(issue) == []:
-        return HttpResponse("<h1>404 - Post not available!</h1>")
+        # return HttpResponse("<h1>404 - Post not available!</h1>")
+        return errorPage(request, message["404"])
     else:
         params = dict(issue.values()[0])
         print(f"\n\n\n{params}\n\n\n")
@@ -170,7 +189,7 @@ def uploadPost(request):
         post.save()
         return redirect('/forum/')
     else:
-        return HttpResponse("<h1>HTTP 403 - Forbidden.</h1>")
+        return errorPage(request, messages["403"])
 
 
 def userProfile(request, slug):
@@ -301,9 +320,12 @@ def deletePost(request, slug):
             elif slug == "comment":
                 return redirect(f"/forum/post/{postSlug}")
         else:
-            return HttpResponse("<h1>Hippity hoppity floppity, the post isn't your property :P")
+            msg = dict(messages["403"])
+            msg["message"] = "Hippity hoppity floppity, the post isn't your property :P"
+            return errorPage(request, msg)
+            # return HttpResponse("<h1>Hippity hoppity floppity, the post isn't your property :P")
     else:
-        return HttpResponse("<h1>Error 403- Forbidden")
+        return errorPage(request, messages["403"])
 
 ##################################################### End User Activities #####################################################
 
@@ -328,7 +350,7 @@ def voteUp(request):
             user.save()
             userprofile.save()
         else:
-            return HttpResponse("<h1>Forbidden</h1>")
+            return errorPage(request, messages["403"])
         
         return redirect(f'/forum/post/{slug}')
     else:
@@ -354,7 +376,7 @@ def voteDown(request):
             user.save()
             userprofile.save()
         else:
-            return HttpResponse("<h1>Forbidden</h1>")
+            return errorPage(request, messages["403"])
         
         return redirect(f'/forum/post/{slug}')
     else:
@@ -388,7 +410,9 @@ def tvoteUp(request):
 
             return HttpResponse("Don't you think the authorities are awesome? :D")
         else:
-            return HttpResponse('"There are no shortcuts to votes :)" ~ Developers')
+            msg = dict(messages["403"])
+            msg["message"] = '"There are no shortcuts to votes :)" ~ Developers'
+            return errorPage(request, msg)
     else:
         return redirect('/forum/login')
 
@@ -420,7 +444,10 @@ def tvoteDown(request):
 
             return HttpResponse("So sorry to know that :(... Maybe they'll look into it now?")
         else:
-            return HttpResponse('"There are no shortcuts to votes :)" ~ Developers')
+            # return HttpResponse('"There are no shortcuts to votes :)" ~ Developers')
+            msg = dict(messages["403"])
+            msg["message"] = '"There are no shortcuts to votes :)" ~ Developers'
+            return errorPage(request, msg)
     else:
         return redirect('/forum/login')
 
@@ -477,7 +504,7 @@ def TagsProcessor(request, mode, args):
 
     text = request.POST.get("tags")
 
-    taglist = list(set([slugify(x.strip(" ").lower()) for x in text.strip(" ").split(",")]))
+    taglist = list(set([slugify(x.strip(" ").strip("&nbsp;").lower()) for x in text.strip(" ").strip("&nbsp;").split(",")]))
 
     tags_all = [x.label for x in Tags.objects.all()]
 
