@@ -1,10 +1,10 @@
-# Hacknpitch
-Hack 'N' Pitch Project on Campus E-Governance.
+# Hack 'N' Pitch Project on Campus E-Governance.
 # CAMPUS E-RAKSHA SEVA
+![Campus-Saathi-logo](https://github.com/anuran-roy/hacknpitch/blob/main/media/forum/images/ic_launcher.png "CAMPUS OWL : ALWAYS GUARDING THE CAMPUS 💯 🥇 👍🏻 ")
+ 
+### Hack 'N' Pitch Project on Campus E-Governance.
 
-Hack 'N' Pitch Project on Campus E-Governance.
-
-## Requirements
+# Requirements
 Any Windows/Linux 4.14+ kernel/MacOS with Python 3.8.10 or above.
 ```bash
 sudo apt-get install python3 # for Debian & Ubuntu based Systems
@@ -68,4 +68,4 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-[MIT](https://choosealicense.com/licenses/mit/)
+[LICENSE](https://github.com/anuran-roy/hacknpitch/blob/main/LICENSE)
