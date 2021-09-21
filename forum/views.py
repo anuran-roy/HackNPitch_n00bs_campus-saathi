@@ -119,14 +119,32 @@ def newUser(request):
 
                 # authenticate(username=username, password=password)
                 # messages.success(request, "Your account has been successfully created!")
-                return HttpResponse(f"<h1>Your account has been successfully created! Your username is: {myuser.username}. Save it somewhere.</h1>")
+                # return HttpResponse(f"<h1>Your account has been successfully created! Your username is: {myuser.username}. Save it somewhere.</h1>")
+                msg = {
+                    "code": "Welcome!",
+                    "status": "Congratulations! Your account has been created!",
+                    "message": f"Your account has been successfully created! Your username is: {myuser.username}. Save it somewhere."
+                    }
+                return errorPage(request, msg)
                 # return redirect('/forum/dashboard')
             elif cpassword != password:
-                return HttpResponse("<h1>Error - Passwords don't match.</h1>")
+                # return HttpResponse("<h1>Error - Passwords don't match.</h1>")
+                msg = {
+                    "code": "Error",
+                    "status": "Uh oh! Your passwords don't match :(",
+                    "message": "Try signing up again, with matching passwords. No worries - we'll be waiting! :D"
+                    }
+                return errorPage(request, msg)
             elif User.objects.filter(username=username) is not None:
                 return redirect('/forum/login')
         except Exception as e:
-            return HttpResponse(f"<h1>An Error Occured. Error details: {e}</h1>")
+            msg = {
+                    "code": "Error",
+                    "status": "Houston! We've got a problem! :(",
+                    "message": f"Please Report the administration about the problem as soon as possible! Tell them the error: {e.message}"
+                }
+            return errorPage(request, msg)
+            # return HttpResponse(f"<h1>An Error Occured. Error details: {e}</h1>")
     else:
         return errorPage(request, messages["403"])
 
@@ -217,13 +235,25 @@ def userProfile(request, slug):
         params["profilepic"] = profilepic
 
         if list(user) == []:
-            return HttpResponse("<h1>Username not found!</h1>")
+            msg = {
+                    "code": 404,
+                    "status": "Username not found :(",
+                    "message": f"The username {slug} you've been searching for is not available in our data. :( Maybe the user deleted their account, or is Anonymous?"
+                }
+            return errorPage(request, msg)
+            # return HttpResponse("<h1>Username not found!</h1>")
         elif request.user.username == slug:
             return redirect('/forum/dashboard/')
         else:
             return render(request, 'forum/user.html', params)
     except IndexError:
-        return HttpResponse("<h1>Username not found!</h1>")
+        # return HttpResponse("<h1>Username not found!</h1>")
+        msg = {
+                "code": 404,
+                "status": "Username not found :(",
+                "message": f"The username {slug} you've been searching for is not available in our data. :( Maybe the user deleted their account, or is Anonymous?"
+            }
+        return errorPage(request, msg)
 
 
 def dashboard(request):
@@ -297,6 +327,12 @@ def postComment(request):
             return redirect(f'/forum/post/{slug}')
         else:
             return HttpResponse("<h1>Really very very sorry fam,<br>your comment has been marked as spam.</h1>")
+            msg = {
+                    "code": 404,
+                    "status": "Spam detected",
+                    "message": "Really very very sorry fam,<br>your comment has been marked as spam."
+                }
+            return errorPage(request, msg)
     else:
         # return HttpResponse("<h1>HTTP 403 - Forbidden</h1>")
         return errorPage(request)
@@ -338,17 +374,22 @@ def voteUp(request):
             author = request.POST.get("poster")
             issues = Issue.objects.filter(sno=postId).first()
             user = User.objects.filter(username=author).first()
-            userprofile = list(set([TeacherProfile.objects.filter(username=author).first(), UserProfile.objects.filter(username=author).first()]))[0] if not (user.is_superuser or user.is_staff) else None
+            userprofile = None # list(set([TeacherProfile.objects.filter(username=author).first(), UserProfile.objects.filter(username=author).first()]))[0]  # if not (user.is_superuser or user.is_staff) else None
+            if TeacherProfile.objects.filter(username=author).first() is not None:
+                userprofile = TeacherProfile.objects.filter(username=author).first()
+            else:
+                userprofile = UserProfile.objects.filter(username=author).first()
             # print("UserProfile:", userprofile.__dict__)
             # print("\n\nUser:", user.__dict__)
             slug = issues.slug
             # if num in [-1, 1] and list(issues) != []:
             issues.votes += 1
-            if user is not None and author != "Anonymous":
-                userprofile.reputation += 1
+            if user is not None and author != "Anonymous" and user.is_superuser == False and user.is_staff == False:
+                userprofile.reputation -= 1
+                userprofile.save()
+            issues.votes -= 1
             issues.save()
             user.save()
-            userprofile.save()
         else:
             return errorPage(request, messages["403"])
         
@@ -364,17 +405,24 @@ def voteDown(request):
             author = request.POST.get("poster")
             issues = Issue.objects.filter(sno=postId).first()
             user = User.objects.filter(username=author).first()
-            userprofile = list(set([TeacherProfile.objects.filter(username=author).first(), UserProfile.objects.filter(username=author).first()]))[0] if not (user.is_superuser or user.is_staff) else None
+            print(f"\n\n{user}\n\n")
+            userprofile = None # list(set([TeacherProfile.objects.filter(username=author).first(), UserProfile.objects.filter(username=author).first()]))[0]  # if not (user.is_superuser or user.is_staff) else None
+            if TeacherProfile.objects.filter(username=author).first() is not None:
+                userprofile = TeacherProfile.objects.filter(username=author).first()
+            else:
+                userprofile = UserProfile.objects.filter(username=author).first()
+            print(f"\n\n{userprofile}\n\n")
             # print("UserProfile:", userprofile.__dict__)
             # print("\n\nUser:", user.__dict__)
             slug = issues.slug
             # if num in [-1, 1] and list(issues) != []:
-            if user is not None and author != "Anonymous":
-                issues.votes -= 1
+            if user is not None and author != "Anonymous" and user.is_superuser == False and user.is_staff == False:
                 userprofile.reputation -= 1
+                userprofile.save()
+            issues.votes -= 1
             issues.save()
             user.save()
-            userprofile.save()
+            
         else:
             return errorPage(request, messages["403"])
         
@@ -408,7 +456,13 @@ def tvoteUp(request):
                     teacheruser.reputation += 1
                     teacheruser.save()
 
-            return HttpResponse("Don't you think the authorities are awesome? :D")
+            # return HttpResponse("Don't you think the authorities are awesome? :D")
+            msg = {
+                "code": ":)",
+                "status": "Kudos to the authorities!",
+                "message": "Your upvote has been successfully recorded. Don't you think the authorities are awesome? :D",
+            }
+            return errorPage(request, msg)
         else:
             msg = dict(messages["403"])
             msg["message"] = '"There are no shortcuts to votes :)" ~ Developers'
@@ -442,7 +496,13 @@ def tvoteDown(request):
                     teacheruser.reputation -= 1
                     teacheruser.save()
 
-            return HttpResponse("So sorry to know that :(... Maybe they'll look into it now?")
+            msg = {
+                "code": ":(",
+                "status": "So sorry to know that...",
+                "message": "Your downvote has been successfully recorded. Maybe they'll look into it now?",
+            }
+            return errorPage(request, msg)
+            # return HttpResponse("So sorry to know that :(... Maybe they'll look into it now?")
         else:
             # return HttpResponse('"There are no shortcuts to votes :)" ~ Developers')
             msg = dict(messages["403"])
@@ -552,6 +612,7 @@ def showTag(request, slug):
         return render(request, 'forum/tag.html', tags.__dict__)
     else:
         return HttpResponse(f"<h1>Tag {slug} doesn't exist!</h1>")
+        
 
 
 ##################################################### End tags #####################################################
