@@ -314,7 +314,7 @@ def postComment(request):
         comment = request.POST.get("comment")
         user = request.user
         postId = request.POST.get("postId")
-        print("\n\n\n\n" + postId + str(type(postId)) + "\n\n\n")
+        # print("\n\n\n\n" + postId + str(type(postId)) + "\n\n\n")
         slug = request.POST.get("postSlug")
         issues = Issue.objects.filter(sno=postId).first()
         username = request.user.username
@@ -405,13 +405,13 @@ def voteDown(request):
             author = request.POST.get("poster")
             issues = Issue.objects.filter(sno=postId).first()
             user = User.objects.filter(username=author).first()
-            print(f"\n\n{user}\n\n")
+            # print(f"\n\n{user}\n\n")
             userprofile = None # list(set([TeacherProfile.objects.filter(username=author).first(), UserProfile.objects.filter(username=author).first()]))[0]  # if not (user.is_superuser or user.is_staff) else None
             if TeacherProfile.objects.filter(username=author).first() is not None:
                 userprofile = TeacherProfile.objects.filter(username=author).first()
             else:
                 userprofile = UserProfile.objects.filter(username=author).first()
-            print(f"\n\n{userprofile}\n\n")
+            # print(f"\n\n{userprofile}\n\n")
             # print("UserProfile:", userprofile.__dict__)
             # print("\n\nUser:", user.__dict__)
             slug = issues.slug
