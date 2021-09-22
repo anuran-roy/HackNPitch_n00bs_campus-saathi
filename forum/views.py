@@ -347,9 +347,13 @@ def deletePost(request, slug):
         a = None
         if slug == "issue":
             a = Issue.objects.filter(sno=postId).first()
+            print(f"\n\nPost: \n\n{a}\n\n")
         elif slug == "comment":
             a = Comment.objects.filter(sno=postId).first()
-            postSlug = str(a.slug)
+            print(f"\n\nComment: \n\n{a}\n\n")
+        postSlug = str(a.slug)
+        print(f"\n\n{request.user.username}")
+        print(f"\n\n{author}")
         if request.user.username == author or request.user.is_superuser:
             a.delete()
             if slug == "issue":
