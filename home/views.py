@@ -24,10 +24,12 @@ def index(request):
     return render(request, 'home/index.html')
 
 def about(request):
-    return HttpResponse("<h1>This is the About page!</h1>")
+    # return HttpResponse("<h1>This is the About page!</h1>")
+    return render(request, 'home/about.html')
 
 def team(request):
-    return HttpResponse("<h1>This is the team page!</h1>")
+    # return HttpResponse("<h1>This is the team page!</h1>")
+    return render(request, 'home/team.html')
 
 def errorPage(request, args=messages["404"], **kwargs):
     return render(request, 'home/errorpage.html', args)
