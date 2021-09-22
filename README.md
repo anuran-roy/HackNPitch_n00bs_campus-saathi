@@ -1,5 +1,5 @@
 # CAMPUS E-RAKSHA SEVA
-![Campus-Saathi-logo](https://github.com/anuran-roy/hacknpitch/blob/main/media/forum/images/ic_launcher.png "CAMPUS OWL : ALWAYS GUARDING THE CAMPUS 💯 🥇 👍🏻 ")
+![Campus-Saathi-logo](https://github.com/anuran-roy/hacknpitch/blob/main/home/static/home/ic_launcher.png "CAMPUS OWL : ALWAYS GUARDING THE CAMPUS 💯 🥇 👍🏻 ")
  
 ### Hack 'N' Pitch Project on Campus E-Governance.
 
