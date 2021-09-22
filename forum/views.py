@@ -23,7 +23,7 @@ messages = {
     "500": {
         "code": 500,
         "status": "Server Error",
-        "message": ""
+        "message": "Houston! We have a problem! Please report to the site administrator."
     },
 }
 
@@ -32,16 +32,22 @@ messages = {
 ##################################################### For index and error pages #####################################################
 
 def index(request):
-    if request.user.is_authenticated:
-        params = {'issues': Issue.objects.all()}
-        params["page_title"] = "Posted Issues"
-        return render(request, 'forum/index.html', params)
-    else:
-        return redirect('/forum/login')
+    try:
+        if request.user.is_authenticated:
+            params = {'issues': Issue.objects.all()}
+            params["page_title"] = "Posted Issues"
+            return render(request, 'forum/index.html', params)
+        else:
+            return redirect('/forum/login')
+    except Exception as e:
+        return errorPage(request, messages["500"])
 
 
 def errorPage(request, args=messages["404"], **kwargs):
-    return render(request, 'forum/errorpage.html', args)
+    try:
+        return render(request, 'forum/errorpage.html', args)
+    except Exception as e:
+        return errorPage(request, messages["500"])
 
 ##################################################### End index and error pages #####################################################
 
@@ -49,104 +55,119 @@ def errorPage(request, args=messages["404"], **kwargs):
 
 
 def signup(request):
-    if request.user.is_authenticated:
-        return redirect('/forum/')
-    else:
-        return render(request, 'forum/signup.html')
+    try:
+        if request.user.is_authenticated:
+            return redirect('/forum/')
+        else:
+            return render(request, 'forum/signup.html')
+    except Exception as e:
+        return errorPage(request, messages["500"])
         
 
 def loggedin(request):
-    if request.user.is_authenticated:
-        return redirect('/forum/')
-    else:
-        return render(request, 'forum/login.html')
+    try:
+        if request.user.is_authenticated:
+            return redirect('/forum/')
+        else:
+            return render(request, 'forum/login.html')
+    except Exception as e:
+        return errorPage(request, messages["500"])
 
 
 def loginUser(request):
-    if request.method == 'POST':    
-        # return HttpResponse("<h1>This is the redirect page.<h1>")
-        loginuser = request.POST.get('loginuser')
-        loginpasswd = request.POST.get('loginpasswd')
-        user = authenticate(username=loginuser, password=loginpasswd)
+    try:
+        if request.method == 'POST':    
+            # return HttpResponse("<h1>This is the redirect page.<h1>")
+            loginuser = request.POST.get('loginuser')
+            loginpasswd = request.POST.get('loginpasswd')
+            user = authenticate(username=loginuser, password=loginpasswd)
 
-        if user is not None:
-            login(request, user)
-            return redirect('/forum/dashboard/')
+            if user is not None:
+                login(request, user)
+                return redirect('/forum/dashboard/')
+            else:
+                return HttpResponse("<h1>Credentials don't match.</h1>")
         else:
-            return HttpResponse("<h1>Credentials don't match.</h1>")
-    else:
-        return errorPage(request, messages["403"])
+            return errorPage(request, messages["403"])
+    except Exception as e:
+        return errorPage(request, messages["500"])
 
 
 def logoutUser(request):
-    # if request.method == 'POST':
-    logout(request)
-    # return HttpResponse("<h1>You've been successfully logged out.</h1>")
-    return redirect('/forum/')
+    try:
+        # if request.method == 'POST':
+        logout(request)
+        # return HttpResponse("<h1>You've been successfully logged out.</h1>")
+        return redirect('/forum/')
+    except Exception as e:
+        return errorPage(request, messages["500"])
 
 
 def newUser(request):
-    if request.method == 'POST':    
-        email = request.POST.get('email')
-        password = request.POST.get('passwd', None)
-        cpassword = request.POST.get('cpasswd', None)
-        username = email
-        role = request.POST.get('role', 'student')
+    try:
+        if request.method == 'POST':    
+            email = request.POST.get('email')
+            password = request.POST.get('passwd', None)
+            cpassword = request.POST.get('cpasswd', None)
+            username = email
+            role = request.POST.get('role', 'student')
 
-        image = request.FILES.get('profilepic')
+            image = request.FILES.get('profilepic')
 
-        print(f"\n\n\n\n{role}\n\n")
-        print(f"\n\n\n\n{User.objects.all()}\n\n")
-        try:    
-            if cpassword == password:
-                myuser = User.objects.create_user(username, email, password)
-                print(f"\n\n\n\n{myuser.__dict__}\n\n")
-                # return HttpResponse("<h1>This is the redirect page.<h1>")
-                myuser.first_name = request.POST.get('fname')
-                myuser.last_name = request.POST.get('lname')
-                myuser.middle_name = request.POST.get('mname', None)
-                # myuser.roll = request.POST.get('rollno')
-                # myuser.reputation = 0
-                myuser.save()
-                myprofile = None
-                if role == 'student':
-                    myprofile = UserProfile(reputation=0, rollno = request.POST.get('rollno'), user=myuser, username=username, profilepic=image)
-                elif role == 'teacher':
-                    myprofile = TeacherProfile(reputation=0, rollno = request.POST.get('rollno'), user=myuser, username=username, tags=[{"tags": []}], profilepic=image)
+            print(f"\n\n\n\n{role}\n\n")
+            print(f"\n\n\n\n{User.objects.all()}\n\n")
+            try:    
+                if cpassword == password:
+                    myuser = User.objects.create_user(username, email, password)
+                    print(f"\n\n\n\n{myuser.__dict__}\n\n")
+                    # return HttpResponse("<h1>This is the redirect page.<h1>")
+                    myuser.first_name = request.POST.get('fname')
+                    myuser.last_name = request.POST.get('lname')
+                    myuser.middle_name = request.POST.get('mname', None)
+                    # myuser.roll = request.POST.get('rollno')
+                    # myuser.reputation = 0
+                    myuser.save()
+                    myprofile = None
+                    if role == 'student':
+                        myprofile = UserProfile(reputation=0, rollno = request.POST.get('rollno'), user=myuser, username=username, profilepic=image)
+                    elif role == 'teacher':
+                        myprofile = TeacherProfile(reputation=0, rollno = request.POST.get('rollno'), user=myuser, username=username, tags=[{"tags": []}], profilepic=image)
 
-                print(f"\n\n\n\n{myprofile.__dict__}\n\n")
-                myprofile.save()
+                    print(f"\n\n\n\n{myprofile.__dict__}\n\n")
+                    myprofile.save()
 
-                # authenticate(username=username, password=password)
-                # messages.success(request, "Your account has been successfully created!")
-                # return HttpResponse(f"<h1>Your account has been successfully created! Your username is: {myuser.username}. Save it somewhere.</h1>")
+                    # authenticate(username=username, password=password)
+                    # messages.success(request, "Your account has been successfully created!")
+                    # return HttpResponse(f"<h1>Your account has been successfully created! Your username is: {myuser.username}. Save it somewhere.</h1>")
+                    msg = {
+                        "code": "Welcome!",
+                        "status": "Congratulations! Your account has been created!",
+                        "message": f"Your account has been successfully created! Your username is: {myuser.username}. Save it somewhere."
+                        }
+                    return errorPage(request, msg)
+                    # return redirect('/forum/dashboard')
+                elif cpassword != password:
+                    # return HttpResponse("<h1>Error - Passwords don't match.</h1>")
+                    msg = {
+                        "code": "Error",
+                        "status": "Uh oh! Your passwords don't match :(",
+                        "message": "Try signing up again, with matching passwords. No worries - we'll be waiting! :D"
+                        }
+                    return errorPage(request, msg)
+                elif User.objects.filter(username=username) is not None:
+                    return redirect('/forum/login')
+            except Exception as e:
                 msg = {
-                    "code": "Welcome!",
-                    "status": "Congratulations! Your account has been created!",
-                    "message": f"Your account has been successfully created! Your username is: {myuser.username}. Save it somewhere."
+                        "code": "Error",
+                        "status": "Houston! We've got a problem! :(",
+                        "message": f"Please Report the administration about the problem as soon as possible! Tell them the error: {e.message}"
                     }
                 return errorPage(request, msg)
-                # return redirect('/forum/dashboard')
-            elif cpassword != password:
-                # return HttpResponse("<h1>Error - Passwords don't match.</h1>")
-                msg = {
-                    "code": "Error",
-                    "status": "Uh oh! Your passwords don't match :(",
-                    "message": "Try signing up again, with matching passwords. No worries - we'll be waiting! :D"
-                    }
-                return errorPage(request, msg)
-            elif User.objects.filter(username=username) is not None:
-                return redirect('/forum/login')
-        except Exception as e:
-            msg = {
-                    "code": "Error",
-                    "status": "Houston! We've got a problem! :(",
-                    "message": f"Please Report the administration about the problem as soon as possible! Tell them the error: {e.message}"
-                }
-            return errorPage(request, msg)
-            # return HttpResponse(f"<h1>An Error Occured. Error details: {e}</h1>")
-    else:
-        return errorPage(request, messages["403"])
+                # return HttpResponse(f"<h1>An Error Occured. Error details: {e}</h1>")
+        else:
+            return errorPage(request, messages["403"])
+    except Exception as e:
+        return errorPage(request, messages["500"])
 
 
 def passwordReset(request):
@@ -178,38 +199,44 @@ def blogPost(request, slug):
         return errorPage(request, messages["404"])
 
 def newPost(request):
-    if not request.user.is_authenticated:
-        return redirect('/forum/login/')
-    else:
-        return render(request, 'forum/post.html')
+    try:
+        if not request.user.is_authenticated:
+            return redirect('/forum/login/')
+        else:
+            return render(request, 'forum/post.html')
+    except Exception as e:
+        return errorPage(request, messages["500"])
 
 
 def uploadPost(request):
-    if request.method == "POST":
-        user = request.user
-        subject = request.POST.get('subject')
-        summary = request.POST.get('summary')
-        description = request.POST.get('description')
+    try:
+        if request.method == "POST":
+            user = request.user
+            subject = request.POST.get('subject')
+            summary = request.POST.get('summary')
+            description = request.POST.get('description')
 
-        # if plino(description):
-        #     return HttpResponse("<h1>Really very very sorry fam,<br>your comment has been marked as spam.</h1>")
-        image = request.FILES.get('myfile')
-        is_anonymous = request.POST.get("anonymize", "off")
-        # print(image)
-        author = request.user.username if is_anonymous == "off" else "Anonymous"
-        slug = slugify(f"{subject.lower()}-{author.lower()}")
+            # if plino(description):
+            #     return HttpResponse("<h1>Really very very sorry fam,<br>your comment has been marked as spam.</h1>")
+            image = request.FILES.get('myfile')
+            is_anonymous = request.POST.get("anonymize", "off")
+            # print(image)
+            author = request.user.username if is_anonymous == "off" else "Anonymous"
+            slug = slugify(f"{subject.lower()}-{author.lower()}")
 
-        tags = TagsProcessor(request, "post", {"author": author, "slug": slug})
+            tags = TagsProcessor(request, "post", {"author": author, "slug": slug})
 
-        post = None
-        if image is not None:
-            post = Issue(user=user, subject=subject, summary=summary, description=description, image=image, author=author, slug=slug, tags=tags)
+            post = None
+            if image is not None:
+                post = Issue(user=user, subject=subject, summary=summary, description=description, image=image, author=author, slug=slug, tags=tags)
+            else:
+                post = Issue(user=user, subject=subject, summary=summary, description=description, author=author, slug=slug, tags=tags)
+            post.save()
+            return redirect('/forum/')
         else:
-            post = Issue(user=user, subject=subject, summary=summary, description=description, author=author, slug=slug, tags=tags)
-        post.save()
-        return redirect('/forum/')
-    else:
-        return errorPage(request, messages["403"])
+            return errorPage(request, messages["403"])
+    except Exception as e:
+        return errorPage(request, messages["500"])
 
 
 def userProfile(request, slug):
@@ -256,117 +283,126 @@ def userProfile(request, slug):
                 "message": f"The username {slug} you've been searching for is not available in our data. :( Maybe the user deleted their account, or is Anonymous?"
             }
         return errorPage(request, msg)
-
+    except Exception as e:
+        return errorPage(request, messages["500"])
 
 def dashboard(request):
-    if request.user.is_authenticated:
-        activity = list(Issue.objects.filter(user=request.user))
-        data = User.objects.filter(username = request.user.username)
-        profile = UserProfile.objects.filter(username = request.user.username).first()
+    try:
+        if request.user.is_authenticated:
+            activity = list(Issue.objects.filter(user=request.user))
+            data = User.objects.filter(username = request.user.username)
+            profile = UserProfile.objects.filter(username = request.user.username).first()
 
-        if request.user.is_superuser:
-            return redirect("/admin/")
-        isTeacher = False
+            if request.user.is_superuser:
+                return redirect("/admin/")
+            isTeacher = False
 
-        if(profile == None):
-            profile = TeacherProfile.objects.filter(username = request.user.username).first()
-            isTeacher = True
+            if(profile == None):
+                profile = TeacherProfile.objects.filter(username = request.user.username).first()
+                isTeacher = True
 
-        params = dict(data.values()[0])
-        params["activity"] = activity
-        params["rollno"] = profile.__dict__["rollno"] if not request.user.is_superuser else "NA"
-        params["reputation"] = profile.__dict__["reputation"] if not request.user.is_superuser else "Inf"
-        params["profilepic"] = profile.__dict__["profilepic"] if not request.user.is_superuser else ''
-        if isTeacher:
-            params["tags"] = profile.__dict__["tags"]
+            params = dict(data.values()[0])
+            params["activity"] = activity
+            params["rollno"] = profile.__dict__["rollno"] if not request.user.is_superuser else "NA"
+            params["reputation"] = profile.__dict__["reputation"] if not request.user.is_superuser else "Inf"
+            params["profilepic"] = profile.__dict__["profilepic"] if not request.user.is_superuser else ''
+            if isTeacher:
+                params["tags"] = profile.__dict__["tags"]
 
-        comments_activity = list(Comment.objects.filter(username=request.user.username))
-        params["comments"] = comments_activity
-        # print(params)
-        # return HttpResponse(f"<h1>This will be the Dashboard for {request.user.username}</h1>")
-        if isTeacher:
-            a = list(Tags.objects.all())
-            username = request.user.username
-            ls = []
-            
-            for i in a:
-                if username in i.usernames:
-                    ls.append(i)
-            
-            params["notifications"] = ls
-            myprof = TeacherProfile.objects.filter(username=username).first()
-            ls2 = [x.label for x in ls]
+            comments_activity = list(Comment.objects.filter(username=request.user.username))
+            params["comments"] = comments_activity
+            # print(params)
+            # return HttpResponse(f"<h1>This will be the Dashboard for {request.user.username}</h1>")
+            if isTeacher:
+                a = list(Tags.objects.all())
+                username = request.user.username
+                ls = []
+                
+                for i in a:
+                    if username in i.usernames:
+                        ls.append(i)
+                
+                params["notifications"] = ls
+                myprof = TeacherProfile.objects.filter(username=username).first()
+                ls2 = [x.label for x in ls]
 
-            if myprof is not None:
-                myprof.tags = ls2
-                myprof.save()
-            
-            print(f"\n\n\n{ls}\n\n\n")
+                if myprof is not None:
+                    myprof.tags = ls2
+                    myprof.save()
+                
+                print(f"\n\n\n{ls}\n\n\n")
 
-        if isTeacher:
-            return render(request, 'forum/staff/dashboard.html', params)
+            if isTeacher:
+                return render(request, 'forum/staff/dashboard.html', params)
+            else:
+                return render(request, 'forum/student/dashboard.html', params)
         else:
-            return render(request, 'forum/student/dashboard.html', params)
-    else:
-        return redirect('/forum/login')
+            return redirect('/forum/login')
+    except Exception as e:
+        return errorPage(request, messages["500"])
 
 
 def postComment(request):
-    if request.method == 'POST':
-        comment = request.POST.get("comment")
-        user = request.user
-        postId = request.POST.get("postId")
-        # print("\n\n\n\n" + postId + str(type(postId)) + "\n\n\n")
-        slug = request.POST.get("postSlug")
-        issues = Issue.objects.filter(sno=postId).first()
-        username = request.user.username
-        tags = TagsProcessor(request, "comment", {"author": username, "slug": slug})
+    try:
+        if request.method == 'POST':
+            comment = request.POST.get("comment")
+            user = request.user
+            postId = request.POST.get("postId")
+            # print("\n\n\n\n" + postId + str(type(postId)) + "\n\n\n")
+            slug = request.POST.get("postSlug")
+            issues = Issue.objects.filter(sno=postId).first()
+            username = request.user.username
+            tags = TagsProcessor(request, "comment", {"author": username, "slug": slug})
 
-        # comment_slug = issue_slug + '-' + datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-        if not plino(comment):
-            obj = Comment(description=comment, issue=issues, user=user, username=username, slug=slug, tags=tags)
-            obj.save()
-            return redirect(f'/forum/post/{slug}')
+            # comment_slug = issue_slug + '-' + datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+            if not plino(comment):
+                obj = Comment(description=comment, issue=issues, user=user, username=username, slug=slug, tags=tags)
+                obj.save()
+                return redirect(f'/forum/post/{slug}')
+            else:
+                msg = {
+                        "code": "Spam",
+                        "status": "Spam detected",
+                        "message": "Really very very sorry fam,<br>your comment has been marked as spam."
+                    }
+                return errorPage(request, msg)
         else:
-            msg = {
-                    "code": "Spam",
-                    "status": "Spam detected",
-                    "message": "Really very very sorry fam,<br>your comment has been marked as spam."
-                }
-            return errorPage(request, msg)
-    else:
-        # return HttpResponse("<h1>HTTP 403 - Forbidden</h1>")
-        return errorPage(request)
-
+            # return HttpResponse("<h1>HTTP 403 - Forbidden</h1>")
+            return errorPage(request)
+    except Exception as e:
+        return errorPage(request, messages["500"])
 
 def deletePost(request, slug):
-    if request.method == "POST":
-        postId = request.POST.get("postId")
-        author = request.POST.get("poster")
-        postSlug = None
-        a = None
-        if slug == "issue":
-            a = Issue.objects.filter(sno=postId).first()
-            print(f"\n\nPost: \n\n{a}\n\n")
-        elif slug == "comment":
-            a = Comment.objects.filter(sno=postId).first()
-            print(f"\n\nComment: \n\n{a}\n\n")
-        postSlug = str(a.slug)
-        print(f"\n\n{request.user.username}")
-        print(f"\n\n{author}")
-        if request.user.username == author or request.user.is_superuser:
-            a.delete()
+    try:
+        if request.method == "POST":
+            postId = request.POST.get("postId")
+            author = request.POST.get("poster")
+            postSlug = None
+            a = None
             if slug == "issue":
-                return redirect("/forum/")
+                a = Issue.objects.filter(sno=postId).first()
+                print(f"\n\nPost: \n\n{a}\n\n")
             elif slug == "comment":
-                return redirect(f"/forum/post/{postSlug}")
+                a = Comment.objects.filter(sno=postId).first()
+                print(f"\n\nComment: \n\n{a}\n\n")
+            postSlug = str(a.slug)
+            print(f"\n\n{request.user.username}")
+            print(f"\n\n{author}")
+            if request.user.username == author or request.user.is_superuser:
+                a.delete()
+                if slug == "issue":
+                    return redirect("/forum/")
+                elif slug == "comment":
+                    return redirect(f"/forum/post/{postSlug}")
+            else:
+                msg = dict(messages["403"])
+                msg["message"] = "Hippity hoppity floppity, the post isn't your property :P"
+                return errorPage(request, msg)
+                # return HttpResponse("<h1>Hippity hoppity floppity, the post isn't your property :P")
         else:
-            msg = dict(messages["403"])
-            msg["message"] = "Hippity hoppity floppity, the post isn't your property :P"
-            return errorPage(request, msg)
-            # return HttpResponse("<h1>Hippity hoppity floppity, the post isn't your property :P")
-    else:
-        return errorPage(request, messages["403"])
+            return errorPage(request, messages["403"])
+    except Exception as e:
+        return errorPage(request, messages["500"])
 
 ##################################################### End User Activities #####################################################
 

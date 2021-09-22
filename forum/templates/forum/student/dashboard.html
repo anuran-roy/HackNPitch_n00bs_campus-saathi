@@ -97,10 +97,10 @@
                       <td>
                         <a href="/forum/post/{{ i.slug }}" target="_blank"><button class="btn btn-primary">Go</button></a>
                         <br><br>
-                        <form method="POST" action="/forum/deletepost/post" class="my-2">
+                        <form method="POST" action="/forum/deletepost/issue" class="my-2">
                           {% csrf_token %}
                           <input type="hidden" name="postId" value="{{i.sno}}">        
-                          <input type="hidden" name="poster" value="{{i.username}}"> 
+                          <input type="hidden" name="poster" value="{{i.author}}"> 
                           <input type="submit" value="Delete" class="btn btn-primary">
                       </form>
                       </td>
