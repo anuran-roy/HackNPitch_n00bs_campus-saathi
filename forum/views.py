@@ -370,6 +370,7 @@ def postComment(request):
             # return HttpResponse("<h1>HTTP 403 - Forbidden</h1>")
             return errorPage(request)
     except Exception as e:
+        print("\n\n{e}\n\n")
         return errorPage(request, messages["500"])
 
 def deletePost(request, slug):
@@ -415,22 +416,24 @@ def voteUp(request):
             author = request.POST.get("poster")
             issues = Issue.objects.filter(sno=postId).first()
             user = User.objects.filter(username=author).first()
+            # print(f"\n\n{user}\n\n")
             userprofile = None # list(set([TeacherProfile.objects.filter(username=author).first(), UserProfile.objects.filter(username=author).first()]))[0]  # if not (user.is_superuser or user.is_staff) else None
             if TeacherProfile.objects.filter(username=author).first() is not None:
                 userprofile = TeacherProfile.objects.filter(username=author).first()
             else:
                 userprofile = UserProfile.objects.filter(username=author).first()
+            # print(f"\n\n{userprofile}\n\n")
             # print("UserProfile:", userprofile.__dict__)
             # print("\n\nUser:", user.__dict__)
             slug = issues.slug
             # if num in [-1, 1] and list(issues) != []:
-            issues.votes += 1
             if user is not None and author != "Anonymous" and user.is_superuser == False and user.is_staff == False:
                 userprofile.reputation -= 1
                 userprofile.save()
-            issues.votes -= 1
+            issues.votes += 1
             issues.save()
             user.save()
+            
         else:
             return errorPage(request, messages["403"])
         
