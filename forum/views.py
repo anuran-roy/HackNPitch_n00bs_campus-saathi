@@ -428,7 +428,7 @@ def voteUp(request):
             slug = issues.slug
             # if num in [-1, 1] and list(issues) != []:
             if user is not None and author != "Anonymous" and user.is_superuser == False and user.is_staff == False:
-                userprofile.reputation -= 1
+                userprofile.reputation += 1
                 userprofile.save()
             issues.votes += 1
             issues.save()
