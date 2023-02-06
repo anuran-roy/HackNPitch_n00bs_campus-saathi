@@ -44,3 +44,9 @@ urlpatterns = [
     # Error Page
     path('<str:id>/', views.errorPage, name="ErrorPage"),
 ]
+
+api_patterns = [
+    path("api/", include("forum.api_urls")),
+]
+
+urlpatterns += api_patterns

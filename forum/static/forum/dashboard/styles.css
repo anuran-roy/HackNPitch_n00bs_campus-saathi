@@ -12,7 +12,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #17191c;
+  background: /* #37517E;/*#17191c;*/
 }
 
 ::-webkit-scrollbar-thumb:hover {
